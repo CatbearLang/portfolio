@@ -84,4 +84,4 @@ Working v0.1 MVP, used daily for Japanese → Spanish. Next: measure cheaper LLM
 
 ## Author
 
-**Lian Yang** — Informatics Engineer.
+**Lian Yang** — Full-Stack Developer.

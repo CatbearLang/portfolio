@@ -55,4 +55,4 @@ Godot 4.7 · GDScript · Unity 6 · C# · ENet (UDP) · Forward+ (desktop) / Com
 
 ## Author
 
-**Lian Yang** — Informatics Engineer.
+**Lian Yang** — Full-Stack Developer.

@@ -8,7 +8,7 @@ export const ui = {
     hero: 'I build end-to-end AI pipelines, full-stack apps and automations — tested, documented and secure by default.',
     ctaProjects: 'See projects', ctaChat: 'Ask my AI assistant',
     aboutTitle: 'About',
-    about: 'Informatics Engineer from Paraguay with about 2 years of hands-on full-stack work in React and PostgreSQL. I design AI workflows (LLMs, speech recognition, TTS, image generation), automate processes with n8n and ship containerized services with Docker and Kubernetes. Open to remote full-stack, backend and AI-automation roles.',
+    about: 'Informatics Engineering candidate (thesis stage) from Paraguay with 3 years of hands-on full-stack work in React and PostgreSQL. I design AI workflows (LLMs, speech recognition, TTS, image generation), automate processes with n8n and ship containerized services with Docker and Kubernetes. Open to remote full-stack, backend and AI-automation roles.',
     skillsTitle: 'Skills', projectsTitle: 'Featured projects', expTitle: 'Experience', eduTitle: 'Education',
     contactTitle: 'Let’s talk', contactText: 'Open to remote roles. The fastest way to reach me is email.',
     readMore: 'Read case study →', back: '← All projects', stack: 'Stack', highlights: 'Highlights', how: 'How it works', built: 'How it was built', links: 'Links',
@@ -21,7 +21,7 @@ export const ui = {
     hero: 'Construyo pipelines de IA de punta a punta, apps full-stack y automatizaciones: con tests, documentadas y seguras por defecto.',
     ctaProjects: 'Ver proyectos', ctaChat: 'Preguntale a mi asistente IA',
     aboutTitle: 'Sobre mí',
-    about: 'Ingeniero en Informática de Paraguay con unos 2 años de experiencia práctica full-stack en React y PostgreSQL. Diseño flujos con IA (LLMs, reconocimiento de voz, TTS, generación de imágenes), automatizo procesos con n8n y despliego servicios en contenedores con Docker y Kubernetes. Abierto a roles remotos full-stack, backend y de automatización con IA.',
+    about: 'Estudiante de Ingeniería en Informática en etapa de tesis, de Paraguay, con 3 años de experiencia práctica full-stack en React y PostgreSQL. Diseño flujos con IA (LLMs, reconocimiento de voz, TTS, generación de imágenes), automatizo procesos con n8n y despliego servicios en contenedores con Docker y Kubernetes. Abierto a roles remotos full-stack, backend y de automatización con IA.',
     skillsTitle: 'Habilidades', projectsTitle: 'Proyectos destacados', expTitle: 'Experiencia', eduTitle: 'Formación',
     contactTitle: 'Hablemos', contactText: 'Disponible para roles remotos. La forma más rápida de contactarme es por email.',
     readMore: 'Ver caso de estudio →', back: '← Todos los proyectos', stack: 'Stack', highlights: 'Puntos clave', how: 'Cómo funciona', built: 'Cómo se hizo', links: 'Enlaces',
@@ -107,17 +107,17 @@ export const projects = [
 
 export const experience = {
   en: [
-    ['Junior Programmer', '3 years', 'Web features across React frontend and backend with PostgreSQL; maintenance, debugging and support.'],
+    ['Freelance Full-Stack Developer & Open-Source Contributor', '3 years', 'Client web projects with React, backend services and PostgreSQL; maintenance and debugging; open-source projects on GitHub (CatbearLang).'],
     ['IT Support — Vinader Computación', '', 'Hardware and software support, installation, troubleshooting and preventive maintenance.'],
     ['Cashier — Casa Jorge', '5 years', 'Customer service, cash handling and daily register balancing.'],
   ],
   es: [
-    ['Programador Junior', '3 años', 'Funcionalidades web en frontend React y backend con PostgreSQL; mantenimiento, depuración y soporte.'],
+    ['Desarrollador Full-Stack Freelance y colaborador Open Source', '3 años', 'Proyectos web para clientes con React, backend y PostgreSQL; mantenimiento y depuración; proyectos open source en GitHub (CatbearLang).'],
     ['Soporte TI — Vinader Computación', '', 'Soporte de hardware y software, instalación, resolución de problemas y mantenimiento preventivo.'],
     ['Cajero — Casa Jorge', '5 años', 'Atención al cliente, manejo de efectivo y cierre de caja.'],
   ],
 }
 export const education = {
-  en: ['Informatics Engineering — Universidad Nacional de Itapúa', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English Intermediate 3A — EUROSUR (2015)'],
-  es: ['Ingeniería en Informática — Universidad Nacional de Itapúa', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés Intermedio 3A — EUROSUR (2015)'],
+  en: ['B.Sc. Informatics Engineering, Universidad Nacional de Itapúa — Thesis stage (in progress)', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English Intermediate 3A — EUROSUR (2015)'],
+  es: ['Ingeniería en Informática, Universidad Nacional de Itapúa — en etapa de tesis', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés Intermedio 3A — EUROSUR (2015)'],
 }

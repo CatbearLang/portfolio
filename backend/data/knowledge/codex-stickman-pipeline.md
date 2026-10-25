@@ -175,6 +175,6 @@ keep their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Author
 
-**Lian Yang**, Informatics Engineer · [@CatbearLang](https://github.com/CatbearLang)
+**Lian Yang**, Full-Stack Developer · [@CatbearLang](https://github.com/CatbearLang)
 
 🇪🇸 [Leer en español](README.es.md)
