@@ -118,6 +118,6 @@ export const experience = {
   ],
 }
 export const education = {
-  en: ['B.Sc. Informatics Engineering, Universidad Nacional de Itapúa — Thesis stage (in progress)', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English Intermediate 3A — EUROSUR (2015)'],
-  es: ['Ingeniería en Informática, Universidad Nacional de Itapúa — en etapa de tesis', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés Intermedio 3A — EUROSUR (2015)'],
+  en: ['B.Sc. Informatics Engineering — Faculty of Engineering, Universidad Nacional de Itapúa (FIUNI) — Thesis stage (in progress)', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English Intermediate 3A — EUROSUR (2015)'],
+  es: ['Ingeniería en Informática — Facultad de Ingeniería, Universidad Nacional de Itapúa (FIUNI) — en etapa de tesis', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés Intermedio 3A — EUROSUR (2015)'],
 }
