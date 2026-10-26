@@ -21,7 +21,7 @@ export default function App() {
   return (
     <>
       <header className="nav">
-        <a href="#/" className="brand">Lian<span>Yang</span></a>
+        <a href="#/" className="brand" aria-label="Home">L<span>Y</span></a>
         <nav>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 0)}>{t.nav.projects}</a>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('experience')?.scrollIntoView(), 0)}>{t.nav.experience}</a>
@@ -52,23 +52,23 @@ function Home({ lang, t, onChat }) {
         <div className="chips">{['React', 'PostgreSQL', 'Python', 'FastAPI', 'LangGraph', 'Docker', 'Kubernetes', 'n8n'].map(s => <span key={s}>{s}</span>)}</div>
       </section>
 
-      <section className="grid2">
-        <div><h2>{t.aboutTitle}</h2><p>{t.about}</p></div>
-        <div><h2>{t.skillsTitle}</h2>
-          <ul className="skills">{skills.map(([k, v]) => <li key={k}><b>{k}</b><span>{v}</span></li>)}</ul></div>
-      </section>
-
       <section id="projects"><h2>{t.projectsTitle}</h2>
         <div className="cards">{projects.map(p => (
           <a key={p.slug} className="card" href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }}>
-            <div className="thumb">{p.image ? <img src={p.image} alt={p.name} loading="lazy" /> : <div className="thumb-fallback">{p.name}</div>}</div>
+            <div className="thumb">{p.image ? <img src={p.image} alt="" loading="lazy" /> : <div className="thumb-fallback">{p.name}</div>}</div>
             <div className="card-body">
-              <h3>{p.name}</h3><p>{p[lang].tagline}</p>
+              <h3>{p.name}</h3><p>{p[lang].tagline}</p><p className="metric">✓ {p[lang].highlights[1]}</p>
               <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
               <span className="more">{t.readMore}</span>
             </div>
           </a>))}
         </div>
+      </section>
+
+      <section className="grid2">
+        <div><h2>{t.aboutTitle}</h2><p>{t.about}</p></div>
+        <div><h2>{t.skillsTitle}</h2>
+          <ul className="skills">{skills.map(([k, v]) => <li key={k}><b>{k}</b><span>{v}</span></li>)}</ul></div>
       </section>
 
       <section id="experience" className="grid2">
@@ -91,7 +91,7 @@ function ProjectPage({ p, lang, t }) {
     <article className="project" style={{ '--accent': p.accent }}>
       <a href="#/" className="back">{t.back}</a>
       <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
-      <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
+      <dl className="facts"><div><dt>{t.context}</dt><dd>{c.context}</dd></div><div><dt>{t.stackL}</dt><dd>{p.tags.join(' · ')}</dd></div></dl>
       {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.name} />}
       <div className="grid2">
         <div><h2>{t.highlights}</h2><ul className="checks">{c.highlights.map(h => <li key={h}>{h}</li>)}</ul></div>
@@ -99,6 +99,7 @@ function ProjectPage({ p, lang, t }) {
       </div>
       <h2>{t.built}</h2><ul>{c.built.map(h => <li key={h}>{h}</li>)}</ul>
       {p.gallery && <div className="gallery">{p.gallery.slice(1).map(g => <img key={g} src={g} alt="" loading="lazy" />)}</div>}
+      {p.links.length === 0 && <p className="muted">{t.noRepo}</p>}
       {p.links.length > 0 && <><h2>{t.links}</h2><div className="cta">{p.links.map(([n, u]) => <a key={u} className="btn" href={u} target="_blank" rel="noreferrer">{n}</a>)}</div></>}
     </article>
   )

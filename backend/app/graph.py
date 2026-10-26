@@ -23,12 +23,12 @@ ANSWER_SYSTEM = (
 )
 
 REFUSAL = {
-    "en": "I can only answer questions about Lian Yang's work, skills and projects. Try asking about GlosSub, Codex Stickman Pipeline or Arcane Knockout.",
-    "es": "Solo puedo responder preguntas sobre el trabajo, las habilidades y los proyectos de Lian Yang. Probá preguntar por GlosSub, Codex Stickman Pipeline o Arcane Knockout.",
+    "en": "I can only answer questions about this portfolio: skills, experience and projects. Try asking about GlosSub, Codex Stickman Pipeline or Arcane Knockout.",
+    "es": "Solo puedo responder preguntas sobre este portfolio: habilidades, experiencia y proyectos. Probá preguntar por GlosSub, Codex Stickman Pipeline o Arcane Knockout.",
 }
 NO_INFO = {
-    "en": "I don't have that information in Lian's documentation. You can ask him directly at Catbeardarkworld@gmail.com.",
-    "es": "No tengo esa información en la documentación de Lian. Podés escribirle a Catbeardarkworld@gmail.com.",
+    "en": "I don't have that information in the project docs. You can ask directly at Catbeardarkworld@gmail.com.",
+    "es": "No tengo esa información en la documentación de los proyectos. Podés escribir a Catbeardarkworld@gmail.com.",
 }
 
 

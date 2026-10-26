@@ -42,7 +42,7 @@ class FakeLLM:
         block = user.split("[1]", 1)[1].split("\n[2]", 1)[0] if "[1]" in user else ""
         lines = [l for l in block.splitlines()[1:] if l.strip() and not l.lstrip().startswith(("#", "|", "```", ">"))]
         snippet = re.sub(r"[*`]", "", " ".join(lines))[:260].strip()
-        return f"(demo mode) From Lian's docs: {snippet} [1]"
+        return f"(demo mode) From the project docs: {snippet} [1]"
 
 
 def make_llm(provider: str, base_url: str, api_key: str, model: str) -> ChatLLM:
