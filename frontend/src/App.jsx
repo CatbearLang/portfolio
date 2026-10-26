@@ -9,7 +9,7 @@ const useHash = () => {
 }
 
 export default function App() {
-  const [lang, setLang] = useState(() => localStorage.getItem('lang') || (navigator.language.startsWith('es') ? 'es' : 'en'))
+  const [lang, setLang] = useState(() => (['en','es'].includes(localStorage.getItem('lang')) ? localStorage.getItem('lang') : 'en'))
   const [chatOpen, setChatOpen] = useState(false)
   useEffect(() => { localStorage.setItem('lang', lang); document.documentElement.lang = lang }, [lang])
   const t = ui[lang]
