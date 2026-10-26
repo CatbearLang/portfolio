@@ -92,7 +92,7 @@ function ProjectPage({ p, lang, t }) {
       <a href="#/" className="back">{t.back}</a>
       <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
       <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
-      {p.image && <img className="hero-img" src={p.image} alt={p.name} />}
+      {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.name} />}
       <div className="grid2">
         <div><h2>{t.highlights}</h2><ul className="checks">{c.highlights.map(h => <li key={h}>{h}</li>)}</ul></div>
         <div><h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol></div>

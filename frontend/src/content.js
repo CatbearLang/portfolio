@@ -36,7 +36,7 @@ export const skills = [
   ['AI & Automation', 'LLM APIs · LangGraph · RAG · Whisper · TTS · n8n'],
   ['DevOps', 'Docker · Kubernetes · CI/data pipelines · load balancing'],
   ['Quality & Security', 'pytest · headless tests · secret scanning · input validation'],
-  ['Games & Media', 'Godot/GDScript · Unity/C# · FFmpeg'],
+  ['Games & Media', 'Unity/C# · FFmpeg'],
 ]
 
 export const projects = [
@@ -78,21 +78,21 @@ export const projects = [
   },
   {
     slug: 'arcane-knockout', name: 'Arcane Knockout', accent: '#f97316',
-    image: 'img/ak-partida-red-anfitrion.webp',
-    gallery: ['img/ak-partida-red-anfitrion.webp', 'img/ak-partida-red-cliente.webp', 'img/ak-sala-anfitrion.webp', 'img/ak-unirse.webp'],
-    tags: ['Godot 4.7', 'GDScript', 'Unity 6', 'C#', 'Multiplayer'],
+    image: 'img/arcane-knockout-unity-poster.jpg',
+    video: 'img/arcane-knockout-unity.mp4',
+    tags: ['Unity 6', 'C#', 'Unity Netcode', 'Multiplayer'],
     links: [],
     en: {
-      tagline: '3D online wizard-duel arena game — game logic and code, AI-assisted workflow.',
-      highlights: ['Online multiplayer: 2–4 players + bots (ENet/UDP)', '~190 GDScript files with headless test runner', 'Windows and Android builds (v1.3.1)', 'Unity 6 / C# port in progress (build 0.0.9)'],
-      how: ['No health bar: each hit raises Instability, so the next push throws you farther while the platform collapses into lava.', 'Data-driven spell system, 10-power Grimoire, shop economy, bots with personality, perception and shopping logic.', 'Rooms by code or IP, LAN discovery and UPnP; spells synchronized over the network.'],
-      built: ['Lian built the game logic and code using AI coding agents, decision records and per-version delivery notes. Art, textures and 3D models were AI-generated.', 'Headless automated tests (e.g. 519 checks / 0 failures in the main runner, 349 economy checks) are mandatory before exporting an Android build.', 'Now being ported to Unity 6 in C#: gameplay, elemental spell clashes, snapshot-based networking and procedural arena collapse.'],
+      tagline: '3D online wizard-duel arena game in Unity 6 / C# — game logic and code, AI-assisted workflow.',
+      highlights: ['Built in Unity 6 with C# (Windows build 0.0.9)', 'Online sessions with snapshot-based networking and LAN room discovery', 'Bots with personality, navigation and shop logic', 'Procedural arena collapse into lava'],
+      how: ['No health bar: each hit raises Instability, so the next push throws you farther while the platform collapses into lava.', 'Gameplay in C#: match controller, combat math, elemental spell clashes and status effects, shop, titles and mastery.', 'Networking on Unity Netcode/Transport: snapshot frames with a history buffer, LAN discovery and a relay/NAT-punch transport.', 'Procedural arenas: a platform graph and collapse planner decide how the ground falls apart.'],
+      built: ['Lian built the game logic and code using AI coding agents, decision records and per-version delivery notes. Art, textures and 3D models were AI-generated.', 'One runtime assembly (~410 types) organized into Gameplay, Net, Core, Arena, Rendering, UI, Audio and Input namespaces.', 'Migrated to Unity 6 from an earlier prototype; uses the Unity Input System and ProBuilder.'],
     },
     es: {
-      tagline: 'Juego 3D de duelos de magos en línea: lógica y código del juego, con flujo asistido por IA.',
-      highlights: ['Multijugador en línea: 2–4 personas + bots (ENet/UDP)', '~190 archivos GDScript con runner de tests headless', 'Builds de Windows y Android (v1.3.1)', 'Port a Unity 6 / C# en curso (build 0.0.9)'],
-      how: ['Sin barra de vida: cada impacto sube la Instability y el próximo empujón te lanza más lejos mientras la plataforma cae a la lava.', 'Sistema de poderes basado en datos, Grimorio de 10 poderes, tienda, bots con personalidad, percepción y compras.', 'Salas por código o IP, descubrimiento en LAN y UPnP; poderes sincronizados en red.'],
-      built: ['Lian hizo la lógica y el código con agentes de programación con IA, registros de decisiones y notas por versión. El arte, las texturas y los modelos 3D fueron generados con IA.', 'Tests automáticos headless (p. ej. 519 chequeos / 0 fallos en el runner principal, 349 de economía) obligatorios antes de exportar a Android.', 'En port a Unity 6 con C#: jugabilidad, choques elementales de hechizos, red por snapshots y derrumbe procedural de la arena.'],
+      tagline: 'Juego 3D de duelos de magos en línea hecho en Unity 6 / C#: lógica y código del juego, con flujo asistido por IA.',
+      highlights: ['Hecho en Unity 6 con C# (build de Windows 0.0.9)', 'Sesiones en línea con red por snapshots y descubrimiento de salas en LAN', 'Bots con personalidad, navegación y compras', 'Derrumbe procedural de la arena a la lava'],
+      how: ['Sin barra de vida: cada impacto sube la Instability y el próximo empujón te lanza más lejos mientras la plataforma cae a la lava.', 'Jugabilidad en C#: controlador de partida, matemática de combate, choques elementales de hechizos y estados, tienda, títulos y maestría.', 'Red sobre Unity Netcode/Transport: frames por snapshot con historial, descubrimiento en LAN y transporte relay/NAT-punch.', 'Arenas procedurales: un grafo de plataformas y un planificador de derrumbe deciden cómo se cae el suelo.'],
+      built: ['Lian hizo la lógica y el código con agentes de programación con IA, registros de decisiones y notas por versión. El arte, las texturas y los modelos 3D fueron generados con IA.', 'Un solo assembly de runtime (~410 tipos) organizado en los namespaces Gameplay, Net, Core, Arena, Rendering, UI, Audio e Input.', 'Migrado a Unity 6 desde un prototipo anterior; usa Unity Input System y ProBuilder.'],
     },
   },
   {

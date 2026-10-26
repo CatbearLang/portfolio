@@ -18,7 +18,7 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 - AI & automation: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n
 - DevOps & infrastructure (intermediate): Docker, Kubernetes, server deployment and maintenance, CI/data pipelines, load balancing, distributed systems
 - Security & quality: secret scanning, input validation, path-traversal protection, pytest, headless test suites
-- Other: algorithms, FFmpeg, Godot/GDScript, Unity/C#, Git/GitHub
+- Other: algorithms, FFmpeg, Unity/C#, Git/GitHub
 
 ## Experience
 
