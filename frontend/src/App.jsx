@@ -20,17 +20,18 @@ export default function App() {
 
   return (
     <>
+      <a className="skip" href="#main">{lang === 'en' ? 'Skip to content' : 'Saltar al contenido'}</a>
       <header className="nav">
         <a href="#/" className="brand" aria-label="Home">LY<span>.</span></a>
-        <nav>
+        <nav aria-label={lang === 'en' ? 'Main' : 'Principal'}>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 0)}>{t.nav.projects}</a>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('experience')?.scrollIntoView(), 0)}>{t.nav.experience}</a>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('contact')?.scrollIntoView(), 0)}>{t.nav.contact}</a>
           <a className="btn small" href={cv} download>{t.nav.cv}</a>
-          <button className="lang" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} aria-label="Toggle language">{lang === 'en' ? 'ES' : 'EN'}</button>
+          <button className="lang" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} aria-label={lang === 'en' ? 'Ver en español' : 'View in English'} lang={lang === 'en' ? 'es' : 'en'}>{lang === 'en' ? 'ES' : 'EN'}</button>
         </nav>
       </header>
-      <main>{project ? <ProjectPage p={project} lang={lang} t={t} /> : <Home lang={lang} t={t} onChat={() => setChatOpen(true)} />}</main>
+      <main id="main" tabIndex={-1}>{project ? <ProjectPage p={project} lang={lang} t={t} /> : <Home lang={lang} t={t} onChat={() => setChatOpen(true)} />}</main>
       <footer><span>© 2026 Lian Yang</span><span>{t.footer}</span></footer>
       <ChatWidget lang={lang} t={t.chat} open={chatOpen} setOpen={setChatOpen} />
     </>
@@ -41,7 +42,7 @@ function Home({ lang, t, onChat }) {
   return (
     <>
       <section className="hero">
-                <p className="eyebrow">{t.role}</p>
+        <p className="eyebrow">{t.role}</p>
         <h1>Lian Yang</h1>
         <p className="lead">{t.hero}</p>
         <div className="cta">
@@ -91,7 +92,7 @@ function ProjectPage({ p, lang, t }) {
       <a href="#/" className="back">{t.back}</a>
       <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
       <dl className="facts"><div><dt>{t.context}</dt><dd>{c.context}</dd></div><div><dt>{t.stackL}</dt><dd>{p.tags.join(' · ')}</dd></div></dl>
-      {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.imageAlt?.[lang] || p.name} />}
+      {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay={!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches} playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.imageAlt?.[lang] || p.name} />}
       <div className="grid2">
         <div><h2>{t.highlights}</h2><ul className="checks">{c.highlights.map(h => <li key={h}>{h}</li>)}</ul></div>
         <div><h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol></div>

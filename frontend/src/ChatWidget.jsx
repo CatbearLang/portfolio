@@ -35,11 +35,11 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
 
   return (
     <>
-      <button className="fab" onClick={() => setOpen(!open)} aria-label={t.title}>{open ? '×' : <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>{t.title}</span></>}</button>
+      <button className="fab" onClick={() => setOpen(!open)} aria-label={t.title} aria-expanded={open}>{open ? '×' : <><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>{t.title}</span></>}</button>
       {open && (
         <div className="chat" role="dialog" aria-label={t.title}>
           <div className="chat-head"><div><b>{t.title}</b><small><i className={`dot ${status}`} />{status === 'online' ? 'LangGraph · RAG' : status}</small></div></div>
-          <div className="chat-body">
+          <div className="chat-body" aria-live="polite">
             <p className="hint">{t.hint}</p>
             {status === 'offline' && msgs.length === 0 && <div className="msg bot">{offlineMsg}</div>}
             {msgs.map((m, i) => (
@@ -52,7 +52,7 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
             <div ref={end} />
           </div>
           <form className="chat-input" onSubmit={e => { e.preventDefault(); ask() }}>
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder={t.placeholder} maxLength={500} disabled={status === 'offline'} />
+            <input aria-label={t.placeholder} value={q} onChange={e => setQ(e.target.value)} placeholder={t.placeholder} maxLength={500} disabled={status === 'offline'} />
             <button disabled={busy || status === 'offline'}>{t.send}</button>
           </form>
         </div>)}
