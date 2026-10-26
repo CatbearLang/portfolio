@@ -42,8 +42,8 @@ function Home({ lang, t, onChat }) {
   return (
     <>
       <section className="hero">
-        <p className="eyebrow">{t.role}</p>
         <h1>Lian Yang</h1>
+        <p className="role">{t.role}</p>
         <p className="lead">{t.hero}</p>
         <div className="cta">
           <a className="btn" href="#/" onClick={() => setTimeout(() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }), 0)}>{t.ctaProjects}</a>
