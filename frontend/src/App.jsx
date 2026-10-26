@@ -21,7 +21,7 @@ export default function App() {
   return (
     <>
       <header className="nav">
-        <a href="#/" className="brand" aria-label="Home">L<span>Y</span></a>
+        <a href="#/" className="brand" aria-label="Home">LY<span>.</span></a>
         <nav>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 0)}>{t.nav.projects}</a>
           <a href="#/" onClick={() => setTimeout(() => document.getElementById('experience')?.scrollIntoView(), 0)}>{t.nav.experience}</a>
@@ -41,13 +41,12 @@ function Home({ lang, t, onChat }) {
   return (
     <>
       <section className="hero">
-        <div className="glow" />
-        <p className="eyebrow">{t.role}</p>
+                <p className="eyebrow">{t.role}</p>
         <h1>Lian Yang</h1>
         <p className="lead">{t.hero}</p>
         <div className="cta">
           <a className="btn" href="#/" onClick={() => setTimeout(() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }), 0)}>{t.ctaProjects}</a>
-          <button className="btn ghost" onClick={onChat}>✨ {t.ctaChat}</button>
+          <button className="btn ghost" onClick={onChat}>{t.ctaChat}</button>
         </div>
         <div className="chips">{['React', 'PostgreSQL', 'Python', 'FastAPI', 'LangGraph', 'Docker', 'Kubernetes', 'n8n'].map(s => <span key={s}>{s}</span>)}</div>
       </section>
@@ -57,7 +56,7 @@ function Home({ lang, t, onChat }) {
           <a key={p.slug} className="card" href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }}>
             <div className="thumb">{p.image ? <img src={p.image} alt="" loading="lazy" /> : <div className="thumb-fallback">{p.name}</div>}</div>
             <div className="card-body">
-              <h3>{p.name}</h3><p>{p[lang].tagline}</p><p className="metric">✓ {p[lang].highlights[1]}</p>
+              <h3>{p.name}</h3><p>{p[lang].tagline}</p><p className="metric">{p[lang].highlights[1]}</p>
               <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
               <span className="more">{t.readMore}</span>
             </div>
