@@ -11,7 +11,7 @@ from .llm import ChatLLM
 ROUTER_SYSTEM = (
     "Classify the visitor question for a developer-portfolio assistant about Lian Yang. "
     "Reply ON_TOPIC if it is about Lian, his skills, experience, education, projects (GlosSub, "
-    "Codex Stickman Pipeline, Arcane Knockout, n8n pilots, this portfolio), availability or contact. "
+    "Codex Stickman Pipeline, Arcane Knockout, this portfolio), availability or contact. "
     "Otherwise reply OFF_TOPIC. Reply with one word."
 )
 

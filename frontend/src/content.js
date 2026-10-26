@@ -95,14 +95,6 @@ export const projects = [
       built: ['Hice la lógica y el código con agentes de programación con IA, registros de decisiones y notas por versión. El arte, las texturas y los modelos 3D fueron generados con IA.', 'Un solo assembly de runtime (~410 tipos) organizado en los namespaces Gameplay, Net, Core, Arena, Rendering, UI, Audio e Input.', 'Migrado a Unity 6 desde un prototipo anterior; usa Unity Input System y ProBuilder.'],
     },
   },
-  {
-    slug: 'n8n-pilots', name: 'n8n Automation Pilots', accent: '#22c55e',
-    image: null,
-    tags: ['n8n', 'APIs', 'AI workflows'],
-    links: [],
-    en: { context: 'Practice/pilot automations.', tagline: 'Pilot workflow automations integrating APIs and AI steps.', highlights: ['Workflow design in n8n', 'API integrations', 'LLM steps inside workflows'], how: ['Pilot automations built in n8n that connect external APIs with AI steps.'], built: ['Practice/pilot projects; detailed case studies are not published yet.'] },
-    es: { context: 'Automatizaciones de práctica/piloto.', tagline: 'Automatizaciones piloto que integran APIs y pasos con IA.', highlights: ['Diseño de flujos en n8n', 'Integración de APIs', 'Pasos con LLM dentro de los flujos'], how: ['Automatizaciones piloto en n8n que conectan APIs externas con pasos de IA.'], built: ['Proyectos de práctica/piloto; los casos detallados aún no están publicados.'] },
-  },
 ]
 
 export const experience = {
