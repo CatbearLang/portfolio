@@ -6,7 +6,7 @@ Bilingual (EN/ES) portfolio site with a **LangGraph** chatbot that answers recru
 
 | Project page | Chat (demo LLM) | Chat offline fallback |
 |---|---|---|
-| ![](screens/project-arcane-knockout.png) | ![](screens/chat.png) | ![](screens/chat-offline.png) |
+| ![](screens/project-arcane-knockout-en.png) | ![](screens/chat.png) | ![](screens/chat-offline.png) |
 
 ## Architecture
 
