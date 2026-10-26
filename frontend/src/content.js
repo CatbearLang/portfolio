@@ -60,7 +60,8 @@ export const projects = [
   },
   {
     slug: 'glossub', name: 'GlosSub', accent: '#22d3ee',
-    image: null,
+    image: 'img/glossub-hero.webp',
+    imageAlt: { en: 'glosSub web app: bilingual color-matched subtitles', es: 'App web glosSub: subtítulos bilingües con colores coincidentes' },
     tags: ['Python', 'FastAPI', 'Whisper', 'LLM', 'Pydantic'],
     links: [],
     en: { context: 'Personal project: local tool for language learners.',

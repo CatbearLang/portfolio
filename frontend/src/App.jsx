@@ -54,7 +54,7 @@ function Home({ lang, t, onChat }) {
       <section id="projects"><h2>{t.projectsTitle}</h2>
         <div className="cards">{projects.map(p => (
           <a key={p.slug} className="card" href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }}>
-            <div className="thumb">{p.image ? <img src={p.image} alt="" loading="lazy" /> : <div className="thumb-fallback">{p.name}</div>}</div>
+            <div className="thumb">{p.image ? <img src={p.image} alt={p.imageAlt?.[lang] || ""} loading="lazy" /> : <div className="thumb-fallback">{p.name}</div>}</div>
             <div className="card-body">
               <h3>{p.name}</h3><p>{p[lang].tagline}</p><p className="metric">{p[lang].highlights[1]}</p>
               <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
@@ -91,7 +91,7 @@ function ProjectPage({ p, lang, t }) {
       <a href="#/" className="back">{t.back}</a>
       <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
       <dl className="facts"><div><dt>{t.context}</dt><dd>{c.context}</dd></div><div><dt>{t.stackL}</dt><dd>{p.tags.join(' · ')}</dd></div></dl>
-      {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.name} />}
+      {p.video ? <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay playsInline controls preload="metadata" /> : p.image && <img className="hero-img" src={p.image} alt={p.imageAlt?.[lang] || p.name} />}
       <div className="grid2">
         <div><h2>{t.highlights}</h2><ul className="checks">{c.highlights.map(h => <li key={h}>{h}</li>)}</ul></div>
         <div><h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol></div>
