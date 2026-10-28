@@ -10,8 +10,8 @@ const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.
 
 const intents = [
   { id: 'glossub', src: 'glossub.md', kw: 'glossub subtitles subtitulos subtítulos bilingual bilingues idiomas language learning whisper',
-    en: () => proj('glossub', 'en') + '\n\nKey results: ' + P('glossub').en.highlights.join('; ') + '.',
-    es: () => proj('glossub', 'es') + '\n\nResultados: ' + P('glossub').es.highlights.join('; ') + '.' },
+    en: () => proj('glossub', 'en') + '\n\nHighlights: ' + P('glossub').en.highlights.join('; ') + '.',
+    es: () => proj('glossub', 'es') + '\n\nPuntos clave: ' + P('glossub').es.highlights.join('; ') + '.' },
   { id: 'stickman', src: 'codex-stickman-pipeline.md', kw: 'stickman codex pipeline video videos explainer explicativo tts ffmpeg cost costo costos budget presupuesto',
     en: () => proj('codex-stickman-pipeline', 'en') + '\n\nHow it was built:\n• ' + P('codex-stickman-pipeline').en.built.join('\n• ') + `\n\nCode: ${GITHUB}/codex-stickman-pipeline`,
     es: () => proj('codex-stickman-pipeline', 'es') + '\n\nCómo se hizo:\n• ' + P('codex-stickman-pipeline').es.built.join('\n• ') + `\n\nCódigo: ${GITHUB}/codex-stickman-pipeline` },

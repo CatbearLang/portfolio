@@ -1,87 +1,43 @@
-# GlosSub — Bilingual subtitles for language learning
+# GlosSub — Bilingual subtitle generator with cross-language alignment
 
-> Local CLI + web tool that turns any video in the language you're learning into **two-line, color-aligned bilingual subtitles** (`.ass` / `.srt` / `.json`) for VLC — without re-rendering or uploading the video.
-
-🇪🇸 [Leer en español](README.es.md) · 🧭 [Architecture](docs/ARCHITECTURE.md)
+> A command-line and local web tool (Python, FastAPI) that turns videos into bilingual subtitles. It uses FFmpeg to extract audio, Whisper to transcribe with timestamps, and a configurable LLM to translate the dialogue and, optionally, link fragments across languages. It exports ASS with color-coded correspondences, plus SRT and JSON, and reuses intermediate results through caching. Video is processed locally; text may be sent to an external provider depending on the configuration.
 
 ## What it's for
 
-Watching series in a foreign language with only native subtitles teaches little; with only original subtitles it's too hard. GlosSub shows both at once:
-
-```
-彼は先生に本をあげた          ← original (top, smaller)
-Él le dio un libro al profesor ← translation (bottom, larger)
-```
-
-Matching words/phrases share the **same color** in both lines, so the learner sees which piece of the original means which piece of the translation. Optional **romaji** (Japanese transliteration) as a third line or replacing kanji.
+Language learners watching real video see the original line and its translation together. In the ASS output, matching words or phrases can share the same color, so the learner sees which part of the original corresponds to which part of the translation. Optional romaji for Japanese.
 
 ## How it works
 
-A pipeline of six pure, cached stages:
+1. Extract: FFmpeg converts the selected audio track to 16 kHz mono audio for speech recognition. Input must be a format FFmpeg can read.
+2. Transcribe: on Mac, MLX Whisper produces the dialogue with word-level timestamps, with filters that discard some likely hallucinations.
+3. Segment: words are grouped into subtitle cues using pauses, punctuation, length and duration, which decides what text appears together and for how long.
+4. Translate: cues are sent in batches, with context, to a configurable LLM over an OpenAI-compatible API. Responses are validated and retried; translation is not guaranteed to be complete, and untranslated cues can remain, flagged as low confidence.
+5. Align (optional): the LLM links words or phrases of the original to the translation. This is meaning alignment shown as colors, not audio sync (timing comes from the transcription), and it can be partial.
+6. Export and reuse: ASS (bilingual layout, colors when aligned), SRT (plain text, no colors) and JSON (structured data). Intermediate results are cached so stages are not repeated on the same material.
 
-| # | Stage | What it does |
-|---|---|---|
-| 1 | `extract` | ffmpeg → 16 kHz mono WAV |
-| 2 | `transcribe` | Whisper (MLX on Apple Silicon, faster-whisper CPU fallback) with word timestamps |
-| 3 | `segment` | Groups words into readable subtitle cues |
-| 4 | `translate` | LLM (any OpenAI-compatible endpoint) with structured JSON, batching and retries |
-| 5 | `align` | LLM maps original ↔ translation phrase groups; strictly validated |
-| 6 | `render` | Writes `.ass` (stacked or column-aligned layouts, colors, romaji), `.srt`, `.json` |
+## Engineering story
 
-Each stage writes a JSON artifact to a content-addressed cache (`~/.glossub/cache/<fingerprint>/`), so re-rendering a different layout is offline and takes under a second; translations are cached per target language.
+The interesting part is the orchestration: transcription, segmentation, contextual translation, bilingual alignment and rendering, each as a separate stage with validation of LLM output and reuse of cached stage results.
 
-## Features
+## Privacy and security
 
-- CLI (Typer): `run`, `transcribe`, `render`, `cache`, `doctor`, `serve`, `tracks`; `--from-stage`, `--force`, `--repair-align`
-- Layouts: `stacked` (default, keeps original word order) and `aligned` (each original chunk positioned above its meaning with `\an8\pos`)
-- 8-color shared palette, Japanese particles inherit their neighbor's color
-- Local web UI (FastAPI) that browses files on disk — the video is never uploaded
-- `doctor` command that verifies ffmpeg/ffprobe actually work, not just exist
+- Video and audio are processed locally. Translation and alignment send text and context to the configured LLM endpoint; if that is a cloud provider, the text leaves the machine, and cost depends on the provider.
+- The local web UI binds to loopback by default and validates file paths. It has no authentication; it is a local tool, not meant for public exposure.
+- The API key is read from environment variables. LLM output is treated as untrusted and validated before use.
 
-## Security by design
+## Known limits
 
-- Server binds to `127.0.0.1` only; path-traversal protection with `Path.resolve()` + `is_relative_to` (symlinks included, fail-closed)
-- API key only from environment variables; never written to config, cache or logs
-- ffmpeg called with argument lists (no `shell=True`)
-- LLM output treated as untrusted: validated with Pydantic plus semantic checks (indices in range, target text literally present); invalid groups are dropped, not trusted
-- Exact pinned dependencies; atomic artifact writes (`temp + os.replace`)
+- The cache key does not include every processing option; changing some parameters (for example model or audio track) may reuse earlier results unless recomputation is forced.
+- Transcription is set up for MLX Whisper on Mac; other platforms are not verified.
+
+## Sample run (one episode, not a guarantee)
+
+On one sample run with a 23.7-minute Japanese episode: 253 of 254 cues were translated and 227 of 254 were colored by alignment (688 alignment groups). These numbers describe that run only and do not measure translation accuracy.
 
 ## Tech stack
 
-Python 3.12 · mlx-whisper / faster-whisper · ffmpeg · Pydantic v2 · Typer · Rich · httpx · FastAPI + Uvicorn · pykakasi · pytest + pysubs2
-
-## Quick start
-
-```bash
-uv venv && source .venv/bin/activate
-uv pip install -e ".[dev]"        # add ".[cpu-asr]" on non-Apple-Silicon machines
-export GLOSSUB_LLM_API_KEY=...     # key for your OpenAI-compatible endpoint
-glossub doctor
-glossub run "episode.mp4" --to es --align
-glossub run "episode.mp4" --to es --align --layout aligned --romaji extra
-glossub serve --media-root ~/Movies   # http://127.0.0.1:8756
-```
-
-## Results (real 23.7-min Japanese episode, Apple M2)
-
-| Run | Translated cues | Phrase groups | Time |
-|---|---|---|---|
-| Translation, turbo model, 6× length guard | 253/254 (99%) | — | 3m11s (ASR cached) |
-| Alignment, batch 20, concurrency 3 | 227/254 colored (89%) | 688 | 11m08s |
-| Re-render from cache | — | — | < 1 s |
-
-QA with libass over 254 cues × 6 layout/romaji combinations (1,524 frames): no clipping.
-
-## Tests
-
-```bash
-pytest tests/ -q     # segmentation, layout, rendering, alignment regressions
-```
-
-## Status
-
-Working v0.1 MVP, used daily for Japanese → Spanish. Next: measure cheaper LLM tiers, finish repair runs, polish the web UI.
+Python · FastAPI · Typer · Pydantic · MLX Whisper · FFmpeg · OpenAI-compatible LLM API · pytest
 
 ## Author
 
-**Lian Yang** — Full-Stack Developer.
+Lian Yang — Full-Stack Developer.
