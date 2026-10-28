@@ -1,6 +1,7 @@
 """FastAPI entrypoint: POST /api/chat, GET /api/health."""
 from __future__ import annotations
 
+import logging
 import os
 from functools import lru_cache
 
@@ -19,6 +20,8 @@ MAX_TURNS = 6        # history turns kept
 MAX_TURN_CHARS = 500  # each history turn truncated
 
 settings = Settings()
+log = logging.getLogger("portfolio")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 app = FastAPI(title="Lian Yang portfolio assistant")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 quotas = Quotas(per_ip_day=int(os.getenv("IP_DAILY", "8")), burst=int(os.getenv("IP_BURST", "3")),
@@ -59,9 +62,15 @@ class ChatOut(BaseModel):
     limited: str | None = None  # quota reason, if refused
 
 
+STATE: dict = {}
+
+
 @lru_cache
 def get_graph():
-    kb = KnowledgeBase.from_dir(settings.knowledge_dir, make_embedder(settings.embedder, settings.embed_model))
+    emb = make_embedder(settings.embedder, settings.embed_model)
+    STATE["embedder"] = f"{type(emb).__name__}" + (f" ({settings.embed_model})" if type(emb).__name__ == "Model2VecEmbedder" else "")
+    log.info("embedder ready: %s", STATE["embedder"])
+    kb = KnowledgeBase.from_dir(settings.knowledge_dir, emb)
     llm = make_llm(settings.llm_provider, settings.llm_base_url, settings.llm_api_key, settings.llm_model)
     return build_graph(kb, llm, settings.top_k, settings.min_score)
 
@@ -78,9 +87,18 @@ def notice(kind: str, lang: str, node: str, **fmt) -> ChatOut:
                    trace=[Step(node=node, detail=kind)])
 
 
+@app.on_event("startup")
+def warm_up():
+    # Load the embedding model + index at boot, not on the first visitor request.
+    try:
+        get_graph()
+    except Exception:
+        log.exception("graph warm-up failed")
+
+
 @app.get("/api/health")
 def health():
-    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>generate_query_or_respond>tools>grade_documents(>rewrite_question)>answer>check", "embeddings": settings.embed_model,
+    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>generate_query_or_respond>tools>grade_documents(>rewrite_question)>answer>check", "embeddings": STATE.get("embedder", "not loaded"),
             "memory": True, "max_question": MAX_Q, "suggested": len(cache.suggested)}
 
 
@@ -99,7 +117,8 @@ def chat(body: ChatIn, request: Request):
         return notice(refused, lang, "rate_limit", n=quotas.per_ip_day)
     try:
         res = run_graph(q, lang, history)
-    except Exception:  # never leak provider errors/keys to the browser
+    except Exception as e:  # never leak provider errors/keys to the browser; log type + message server-side
+        log.exception("chat failed: %s: %s", type(e).__name__, str(e)[:300].replace(settings.llm_api_key or "\x00", "***"))
         raise HTTPException(status_code=502, detail="assistant_unavailable")
     if not history:
         cache.put(key, res)

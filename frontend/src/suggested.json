@@ -3,41 +3,41 @@
   "lang": "es",
   "question": "¿Qué proyecto de LangGraph hizo y cómo funciona?",
   "response": {
-   "answer": "El proyecto de LangGraph es el asistente de chat de este portfolio: un backend FastAPI que ejecuta un StateGraph con nodos de prefiltrado (regex), enrutamiento (clasificador LLM), recuperación híbrida (BM25 + FAISS en memoria), respuesta (LLM Nemotron vía OpenRouter) y verificación de fundamentación (segundo LLM) [1][2]. Mantiene memoria conversacional breve y el frontend (React + Vite) cae a búsqueda por palabras clave si el backend no está disponible [2]. Incluye límites de seguridad (300 caracteres, 8 preguntas/día por visitante, caché y preguntas precomputadas) y endurecimiento contra inyección de prompts (prefiltro, delimitadores, verificación de fundamentación) [2].",
+   "answer": "El asistente de este portfolio es el proyecto de LangGraph de Lian: un backend FastAPI (Python) que ejecuta un StateGraph con nodos de prefiltrado, generación de consultas, búsqueda híbrida (BM25 60 % + embeddings semánticos 40 % con model2vec en FAISS, ~200 MB RAM), calificación de documentos, reescritura de preguntas, respuesta y verificación de fundamentación [1][2][3].\n\n- Incluye capas de seguridad (regex prefilter, delimitadores, grounding check) y límites de uso (300 caracteres, 8 preguntas/día por visitante).\n- El frontend es React + Vite en GitHub Pages con fallback a búsqueda por palabras clave si el backend no está disponible.\n- Cada respuesta muestra el rastro del agente (nodos ejecutados, chunks recuperados con scores, chequeo de fundamentación) y los fragmentos citados.",
    "trace": [
     {
      "node": "prefilter",
-     "detail": "no rule matched → LLM router"
+     "detail": "no rule matched → agent"
     },
     {
-     "node": "route",
-     "detail": "LLM router → about_lian"
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"LangGraph project\")"
     },
     {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
+     "node": "tools",
+     "detail": "query \"LangGraph project\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
      "hits": [
       {
        "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-       "score": 0.64
+       "score": 0.764
       },
       {
        "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-       "score": 0.436
+       "score": 0.573
       },
       {
-       "title": "Lian Yang — Profile › Technical skills",
-       "score": 0.41
+       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+       "score": 0.486
       }
      ]
     },
     {
      "node": "grade_documents",
-     "detail": "2/3 chunks relevant"
+     "detail": "3/3 chunks relevant"
     },
     {
      "node": "answer",
-     "detail": "LLM answer from sources with citations"
+     "detail": "LLM answer from graded sources with citations"
     },
     {
      "node": "check",
@@ -49,15 +49,22 @@
      "id": 1,
      "source": "profile",
      "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-     "snippet": "## This portfolio and its AI assistant (LangGraph project)\n\nThe chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:\n\n- prefilter: fast regex rules catch obvious requests for personal data or for project source code;\n- route: an LLM classifies everything else as a question about Lian, a source-code request, or off-topic (",
-     "score": 0.64
+     "snippet": "## This portfolio and its AI assistant (LangGraph project)\n\nThe chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:\n\n- prefilter: fast regex rules catch obvious prompt-injection attempts, requests for personal data, and requests for project source code;\n- generate_query_or_respond: an LLM (built with LangChain's ChatOpen",
+     "score": 0.764
     },
     {
      "id": 2,
      "source": "profile",
      "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-     "snippet": "leep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. Every answer shows an \"agent trace\" (which nodes ran, which chunks were retrieved with their scores, whether the grounding check passed) and the exact cited snippets.\n\nSafety and cost limits: questions are limited to 300 characters; each visitor gets 8 free questions per day with a short burst",
-     "score": 0.436
+     "snippet": "epeated questions are served from a cache. Prompt-injection hardening is layered: a regex prefilter declines obvious attempts (\"ignore previous instructions\", asking for the system prompt or keys), visitor text and documents are wrapped in delimiters that the prompts treat as data only, the model never receives any secret, and the grounding check rejects answers not supported by the sources. This ",
+     "score": 0.573
+    },
+    {
+     "id": 3,
+     "source": "profile",
+     "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+     "snippet": "question reformulates the question and sends it back to the agent to search again (at most once), following the official LangGraph agentic RAG tutorial;\n- answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];\n- check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with s",
+     "score": 0.486
     }
    ]
   }
@@ -66,31 +73,31 @@
   "lang": "es",
   "question": "¿Cuál es su stack?",
   "response": {
-   "answer": "Su stack incluye React, JavaScript y HTML/CSS en frontend; Python con FastAPI, Typer y Pydantic, PostgreSQL y APIs REST en backend; para IA y automatización usa APIs de LLM compatibles con OpenAI, salidas JSON estructuradas, Whisper ASR, TTS, generación de imágenes, flujos de IA, LangGraph y n8n; en DevOps maneja Docker, Kubernetes, despliegue y mantenimiento de servidores, pipelines de CI/datos, balanceo de carga y sistemas distribuidos; también aplica escaneo de secretos, validación de entrada, protección contra path traversal, pytest y suites de pruebas headless, además de algoritmos, FFmpeg, Unity/C# y Git/GitHub [1].",
+   "answer": "Lian trabaja con un stack full-stack moderno: en frontend usa React, JavaScript y HTML/CSS; en backend y datos emplea Python (FastAPI, Typer, Pydantic), PostgreSQL y APIs REST; para IA y automatización integra APIs de LLM compatibles con OpenAI, salidas JSON estructuradas, Whisper ASR, TTS, generación de imágenes, flujos de IA, LangGraph y n8n; en DevOps e infraestructura (nivel intermedio) maneja Docker, Kubernetes, despliegue y mantenimiento de servidores, pipelines de CI/datos, balanceo de carga y sistemas distribuidos; también aplica prácticas de seguridad y calidad como escaneo de secretos, validación de entradas, protección contra path traversal, pytest y suites de pruebas headless, y domina algoritmos, FFmpeg, Unity/C# y Git/GitHub [1].",
    "trace": [
     {
      "node": "prefilter",
-     "detail": "no rule matched → LLM router"
+     "detail": "no rule matched → agent"
     },
     {
-     "node": "route",
-     "detail": "LLM router → about_lian"
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"tech stack skills\")"
     },
     {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
+     "node": "tools",
+     "detail": "query \"tech stack skills\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
      "hits": [
       {
        "title": "Lian Yang — Profile › Technical skills",
-       "score": 0.6
+       "score": 0.77
       },
       {
-       "title": "Lian Yang — Profile › Experience",
-       "score": 0.309
+       "title": "GlosSub — learn languages by watching series › Tech stack",
+       "score": 0.551
       },
       {
-       "title": "Lian Yang — Profile › Summary",
-       "score": 0.291
+       "title": "<div align=\"center\"> › Tech stack",
+       "score": 0.499
       }
      ]
     },
@@ -100,7 +107,7 @@
     },
     {
      "node": "answer",
-     "detail": "LLM answer from sources with citations"
+     "detail": "LLM answer from graded sources with citations"
     },
     {
      "node": "check",
@@ -113,7 +120,7 @@
      "source": "profile",
      "title": "Lian Yang — Profile › Technical skills",
      "snippet": "## Technical skills\n\n- Frontend: React, JavaScript, HTML/CSS\n- Backend & data: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs\n- AI & automation: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n\n- DevOps & infrastructure (intermediate): Docker, Kubernetes, server deployment and maintenance, CI/data pipelines, load bala",
-     "score": 0.6
+     "score": 0.77
     }
    ]
   }
@@ -122,87 +129,31 @@
   "lang": "es",
   "question": "¿Cómo ayuda GlosSub a aprender idiomas?",
   "response": {
-   "answer": "GlosSub te ayuda a aprender idiomas viendo series: extrae el audio con FFmpeg, lo transcribe con Whisper (con marcas de tiempo), usa un LLM configurable para traducir el diálogo y alinea palabra por palabra entre el original y la traducción, mostrando correspondencias con código de color en subtítulos ASS (también exporta SRT y JSON) [1]. El procesamiento de video es local; el texto puede ir a un proveedor externo según la configuración [1].",
+   "answer": "GlosSub ayuda a aprender idiomas generando subtítulos bilingües alineados: extrae el audio con FFmpeg, lo transcribe con Whisper, lo traduce con un LLM y alinea palabras entre el original y la traducción, mostrando correspondencias con colores en el formato ASS [1][2]. Así el estudiante ve qué parte del original corresponde a cada parte de la traducción, y opcionalmente incluye romaji para japonés [1]. Exporta ASS, SRT y JSON, y procesa el video localmente [2].",
    "trace": [
     {
      "node": "prefilter",
-     "detail": "no rule matched → LLM router"
+     "detail": "no rule matched → agent"
     },
     {
-     "node": "route",
-     "detail": "LLM router → about_lian"
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"GlosSub language learning features\")"
     },
     {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
+     "node": "tools",
+     "detail": "query \"GlosSub language learning features\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
      "hits": [
+      {
+       "title": "GlosSub — learn languages by watching series › What it's for",
+       "score": 0.824
+      },
       {
        "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
-       "score": 0.636
+       "score": 0.731
       },
       {
-       "title": "GlosSub — learn languages by watching series › Tech stack",
-       "score": 0.611
-      },
-      {
-       "title": "GlosSub — learn languages by watching series › Engineering story",
-       "score": 0.579
-      }
-     ]
-    },
-    {
-     "node": "grade_documents",
-     "detail": "1/3 chunks relevant"
-    },
-    {
-     "node": "answer",
-     "detail": "LLM answer from sources with citations"
-    },
-    {
-     "node": "check",
-     "detail": "grounded in sources"
-    }
-   ],
-   "sources": [
-    {
-     "id": 1,
-     "source": "glossub",
-     "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
-     "snippet": "# GlosSub — learn languages by watching series\n\n> GlosSub helps people learn languages by watching series. It captures and understands the audio with Whisper, an LLM translates it and generates the subtitles, and then it aligns the words between the original and the translation (color-coded) so learners understand the translation better. Technically, it is a bilingual subtitle generator with cross",
-     "score": 0.636
-    }
-   ]
-  }
- },
- {
-  "lang": "en",
-  "question": "What LangGraph project did he build and how does it work?",
-  "response": {
-   "answer": "Lian built the AI assistant on this portfolio site as a LangGraph + RAG demo. It runs a FastAPI backend with a StateGraph that routes questions through a prefilter, classifier, hybrid retriever (BM25 + hashed vectors in FAISS), an answer generator (NVIDIA Nemotron via OpenRouter), and a grounding check that retries once if the answer isn't supported by sources [1]. The frontend is React + Vite on GitHub Pages and falls back to a simple in-browser keyword search if the backend is unavailable [2].\n\nKey nodes in the graph:\n- **prefilter**: regex rules block personal-data or source-code requests\n- **route**: LLM classifies input as on-topic, source-code, or off-topic\n- **retrieve**: hybrid keyword/vector search over project docs\n- **answer**: LLM answers only from retrieved chunks with citations\n- **check**: second LLM verifies grounding; one retry if needed [1][2]",
-   "trace": [
-    {
-     "node": "prefilter",
-     "detail": "no rule matched → LLM router"
-    },
-    {
-     "node": "route",
-     "detail": "LLM router → about_lian"
-    },
-    {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
-     "hits": [
-      {
-       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-       "score": 0.691
-      },
-      {
-       "title": "<div align=\"center\"> › Why this project",
-       "score": 0.408
-      },
-      {
-       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-       "score": 0.394
+       "title": "GlosSub — Architecture & how it was built › Lessons learned",
+       "score": 0.729
       }
      ]
     },
@@ -212,7 +163,70 @@
     },
     {
      "node": "answer",
-     "detail": "LLM answer from sources with citations"
+     "detail": "LLM answer from graded sources with citations"
+    },
+    {
+     "node": "check",
+     "detail": "grounded in sources"
+    }
+   ],
+   "sources": [
+    {
+     "id": 1,
+     "source": "glossub",
+     "title": "GlosSub — learn languages by watching series › What it's for",
+     "snippet": "## What it's for\n\nLanguage learners watching real video see the original line and its translation together. In the ASS output, matching words or phrases can share the same color, so the learner sees which part of the original corresponds to which part of the translation. Optional romaji for Japanese.",
+     "score": 0.824
+    },
+    {
+     "id": 2,
+     "source": "glossub",
+     "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
+     "snippet": "# GlosSub — learn languages by watching series\n\n> GlosSub helps people learn languages by watching series. It captures and understands the audio with Whisper, an LLM translates it and generates the subtitles, and then it aligns the words between the original and the translation (color-coded) so learners understand the translation better. Technically, it is a bilingual subtitle generator with cross",
+     "score": 0.731
+    }
+   ]
+  }
+ },
+ {
+  "lang": "en",
+  "question": "What LangGraph project did he build and how does it work?",
+  "response": {
+   "answer": "Lian built the AI assistant on this portfolio as a LangGraph project: a FastAPI backend running a StateGraph with nodes for prefiltering, query generation, hybrid retrieval (BM25 60% + model2vec embeddings 40% in FAISS), document grading, optional query rewrite, answer generation (NVIDIA Nemotron via OpenRouter), and a grounding check [1][3]. The graph includes a single retry loop, short conversation memory, and safety limits (300‑char questions, 8 per visitor per day) [3]. The frontend is React + Vite on GitHub Pages with a client‑side keyword‑search fallback when the backend is unavailable [3].",
+   "trace": [
+    {
+     "node": "prefilter",
+     "detail": "no rule matched → agent"
+    },
+    {
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"LangGraph project\")"
+    },
+    {
+     "node": "tools",
+     "detail": "query \"LangGraph project\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
+     "hits": [
+      {
+       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+       "score": 0.764
+      },
+      {
+       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+       "score": 0.573
+      },
+      {
+       "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+       "score": 0.486
+      }
+     ]
+    },
+    {
+     "node": "grade_documents",
+     "detail": "3/3 chunks relevant"
+    },
+    {
+     "node": "answer",
+     "detail": "LLM answer from graded sources with citations"
     },
     {
      "node": "check",
@@ -224,15 +238,22 @@
      "id": 1,
      "source": "profile",
      "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-     "snippet": "## This portfolio and its AI assistant (LangGraph project)\n\nThe chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:\n\n- prefilter: fast regex rules catch obvious requests for personal data or for project source code;\n- route: an LLM classifies everything else as a question about Lian, a source-code request, or off-topic (",
-     "score": 0.691
+     "snippet": "## This portfolio and its AI assistant (LangGraph project)\n\nThe chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:\n\n- prefilter: fast regex rules catch obvious prompt-injection attempts, requests for personal data, and requests for project source code;\n- generate_query_or_respond: an LLM (built with LangChain's ChatOpen",
+     "score": 0.764
     },
     {
      "id": 2,
      "source": "profile",
      "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
-     "snippet": "leep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. Every answer shows an \"agent trace\" (which nodes ran, which chunks were retrieved with their scores, whether the grounding check passed) and the exact cited snippets.\n\nSafety and cost limits: questions are limited to 300 characters; each visitor gets 8 free questions per day with a short burst",
-     "score": 0.394
+     "snippet": "epeated questions are served from a cache. Prompt-injection hardening is layered: a regex prefilter declines obvious attempts (\"ignore previous instructions\", asking for the system prompt or keys), visitor text and documents are wrapped in delimiters that the prompts treat as data only, the model never receives any secret, and the grounding check rejects answers not supported by the sources. This ",
+     "score": 0.573
+    },
+    {
+     "id": 3,
+     "source": "profile",
+     "title": "Lian Yang — Profile › This portfolio and its AI assistant (LangGraph project)",
+     "snippet": "question reformulates the question and sends it back to the agent to search again (at most once), following the official LangGraph agentic RAG tutorial;\n- answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];\n- check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with s",
+     "score": 0.486
     }
    ]
   }
@@ -241,31 +262,31 @@
   "lang": "en",
   "question": "What is his tech stack?",
   "response": {
-   "answer": "Based on his profile, Lian Yang's tech stack includes:\n\n- **Frontend**: React, JavaScript, HTML/CSS\n- **Backend & Data**: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs\n- **AI & Automation**: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n\n- **DevOps & Infrastructure** (intermediate): Docker, Kubernetes, server deployment/maintenance, CI/data pipelines, load balancing, distributed systems\n- **Security & Quality**: secret scanning, input validation, path-traversal protection, pytest, headless test suites\n- **Other**: algorithms, FFmpeg, Unity/C#, Git/GitHub [1]",
+   "answer": "Lian’s tech stack spans frontend, backend, AI/automation, DevOps, and security. Key technologies include:\n\n- Frontend: React, JavaScript, HTML/CSS  \n- Backend & data: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs  \n- AI & automation: LLM APIs (OpenAI-compatible), Whisper ASR, TTS, image generation, LangGraph, n8n  \n- DevOps & infrastructure: Docker, Kubernetes, server deployment, CI/data pipelines, load balancing  \n- Security & quality: secret scanning, input validation, pytest, headless test suites  \n- Other: algorithms, FFmpeg, Unity/C#, Git/GitHub [1]",
    "trace": [
     {
      "node": "prefilter",
-     "detail": "no rule matched → LLM router"
+     "detail": "no rule matched → agent"
     },
     {
-     "node": "route",
-     "detail": "LLM router → about_lian"
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"tech stack skills technologies\")"
     },
     {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
+     "node": "tools",
+     "detail": "query \"tech stack skills technologies\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
      "hits": [
       {
        "title": "Lian Yang — Profile › Technical skills",
-       "score": 0.6
+       "score": 0.801
       },
       {
        "title": "GlosSub — learn languages by watching series › Tech stack",
-       "score": 0.499
+       "score": 0.56
       },
       {
        "title": "<div align=\"center\"> › Tech stack",
-       "score": 0.463
+       "score": 0.511
       }
      ]
     },
@@ -275,7 +296,7 @@
     },
     {
      "node": "answer",
-     "detail": "LLM answer from sources with citations"
+     "detail": "LLM answer from graded sources with citations"
     },
     {
      "node": "check",
@@ -288,7 +309,7 @@
      "source": "profile",
      "title": "Lian Yang — Profile › Technical skills",
      "snippet": "## Technical skills\n\n- Frontend: React, JavaScript, HTML/CSS\n- Backend & data: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs\n- AI & automation: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n\n- DevOps & infrastructure (intermediate): Docker, Kubernetes, server deployment and maintenance, CI/data pipelines, load bala",
-     "score": 0.6
+     "score": 0.801
     }
    ]
   }
@@ -297,41 +318,41 @@
   "lang": "en",
   "question": "How does GlosSub help you learn languages?",
   "response": {
-   "answer": "GlosSub helps language learning by generating bilingual subtitles with color‑coded word alignments between the original dialogue and its translation. It extracts audio from videos, transcribes it with Whisper, translates via a configurable LLM, and aligns corresponding fragments so learners can see direct mappings. The tool exports subtitles in ASS, SRT and JSON formats, processing video locally while optionally sending text to an external LLM provider. [1]",
+   "answer": "GlosSub generates bilingual subtitles from video audio using Whisper transcription and LLM translation, then aligns words or phrases between the original and translated lines with color‑coding in the ASS output so learners can see direct correspondences [1][2]. It also provides optional romaji for Japanese content [1]. The tool processes video locally and exports ASS, SRT, and JSON formats for flexible study.",
    "trace": [
     {
      "node": "prefilter",
-     "detail": "no rule matched → LLM router"
+     "detail": "no rule matched → agent"
     },
     {
-     "node": "route",
-     "detail": "LLM router → about_lian"
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"GlosSub language learning features\")"
     },
     {
-     "node": "retrieve",
-     "detail": "3 chunks (hybrid BM25 + vectors, min score 0.15)",
+     "node": "tools",
+     "detail": "query \"GlosSub language learning features\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
      "hits": [
       {
+       "title": "GlosSub — learn languages by watching series › What it's for",
+       "score": 0.824
+      },
+      {
        "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
-       "score": 0.722
+       "score": 0.731
       },
       {
-       "title": "GlosSub — learn languages by watching series › Tech stack",
-       "score": 0.693
-      },
-      {
-       "title": "GlosSub — learn languages by watching series › Engineering story",
-       "score": 0.64
+       "title": "GlosSub — Architecture & how it was built › Lessons learned",
+       "score": 0.729
       }
      ]
     },
     {
      "node": "grade_documents",
-     "detail": "1/3 chunks relevant"
+     "detail": "2/3 chunks relevant"
     },
     {
      "node": "answer",
-     "detail": "LLM answer from sources with citations"
+     "detail": "LLM answer from graded sources with citations"
     },
     {
      "node": "check",
@@ -342,9 +363,16 @@
     {
      "id": 1,
      "source": "glossub",
+     "title": "GlosSub — learn languages by watching series › What it's for",
+     "snippet": "## What it's for\n\nLanguage learners watching real video see the original line and its translation together. In the ASS output, matching words or phrases can share the same color, so the learner sees which part of the original corresponds to which part of the translation. Optional romaji for Japanese.",
+     "score": 0.824
+    },
+    {
+     "id": 2,
+     "source": "glossub",
      "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
      "snippet": "# GlosSub — learn languages by watching series\n\n> GlosSub helps people learn languages by watching series. It captures and understands the audio with Whisper, an LLM translates it and generates the subtitles, and then it aligns the words between the original and the translation (color-coded) so learners understand the translation better. Technically, it is a bilingual subtitle generator with cross",
-     "score": 0.722
+     "score": 0.731
     }
    ]
   }

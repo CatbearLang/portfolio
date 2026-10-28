@@ -155,4 +155,9 @@ def make_embedder(kind: str, model: str) -> Embedder:
         return HashEmbedder()
     if kind == "fastembed":
         return FastEmbedder(model)
-    return Model2VecEmbedder(model)
+    try:
+        return Model2VecEmbedder(model)
+    except Exception:  # no network / bad model name: degrade to BM25 + hashed vectors instead of failing every request
+        import logging
+        logging.getLogger("portfolio").exception("model2vec load failed for %s; falling back to hash embedder", model)
+        return HashEmbedder()
