@@ -61,3 +61,6 @@ h1,h2,h3{text-wrap:balance}p,li,dd{text-wrap:pretty}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.card:hover .thumb img{transform:none}}
 
 ::selection{background:#dbe5fd;color:var(--text)}input{caret-color:var(--brand)}html{scrollbar-color:#d4d4d8 var(--bg)}.lead,.grid2 p,.timeline p{max-width:68ch}.contact p a,.project li a{text-decoration:underline;text-underline-offset:3px}
+
+.trace{margin-top:8px;font-size:.78rem;color:var(--faint);white-space:normal}.trace summary{cursor:pointer;color:var(--brand)}.trace ol{margin:6px 0 0;padding-left:18px}.trace ul{margin:2px 0;padding-left:14px}.trace code{font-size:.72rem}.trace-h{margin:8px 0 4px;font-weight:600}.trace blockquote{margin:4px 0;padding:4px 8px;border-left:2px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}
+.limit-note{display:block;padding:0 10px 8px;color:var(--faint);font-size:.72rem}

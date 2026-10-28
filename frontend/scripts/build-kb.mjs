@@ -13,3 +13,4 @@ for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()) {
   })
 }
 fs.writeFileSync('src/kb.json', JSON.stringify(out)); console.log(out.length, 'chunks')
+fs.copyFileSync('../backend/data/suggested.json', 'src/suggested.json'); console.log('suggested answers copied')

@@ -1,5 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { localAnswer } from './localAssistant.js'
+import suggested from './suggested.json'
+
+const MAX_Q = 300
+const keyOf = (q, l) => `${l}:${q.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean).join(' ')}`
+const PRE = Object.fromEntries(suggested.map(i => [keyOf(i.question, i.lang), i.response]))
+
+function Trace({ m, t }) {
+  if (!m.trace?.length && !m.sources?.some(s => s.snippet)) return null
+  return (
+    <details className="trace">
+      <summary>{t.trace}{m.cached ? ` · ${m.cached === 'suggested' ? t.cachedNote : t.lruNote}` : ''}</summary>
+      <ol>{(m.trace || []).map((s, i) => <li key={i}><b>{s.node}</b>: {s.detail}
+        {s.hits?.length > 0 && <ul>{s.hits.map((h, j) => <li key={j}>[{j + 1}] {h.title} <code>{h.score}</code></li>)}</ul>}</li>)}</ol>
+      {m.sources?.some(s => s.snippet) && <><p className="trace-h">{t.sourcesTitle}</p>
+        {m.sources.map(s => <blockquote key={s.id}><b>[{s.id}] {s.title}</b><br />{s.snippet}{s.snippet.length >= 400 ? '…' : ''}</blockquote>)}</>}
+    </details>)
+}
 
 const API = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
@@ -29,11 +46,15 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
   async function ask(text) {
     const question = (text ?? q).trim()
     if (question.length < 2 || busy) return
-    setQ(''); setMsgs(m => [...m, { role: 'user', text: question }]); setBusy(true)
+    if (question.length > MAX_Q) { setMsgs(m => [...m, { role: 'user', text: question.slice(0, 80) + '…' }, { role: 'bot', text: t.tooLong, local: true }]); return }
+    setQ('')
+    const pre = PRE[keyOf(question, lang)]
+    if (pre) { setMsgs(m => [...m, { role: 'user', text: question }, { role: 'bot', text: pre.answer, sources: pre.sources, trace: pre.trace, cached: 'suggested' }]); return }
+    setMsgs(m => [...m, { role: 'user', text: question }]); setBusy(true)
     const local = () => { const d = localAnswer(question, lang); setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources, local: Boolean(API) }]) }
     if (!API) { setTimeout(() => { local(); setBusy(false) }, 250); return }
     // Conversation memory: last 6 AI turns (fallback answers are not sent back).
-    const history = msgs.filter(m => !m.local).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text.slice(0, 1500) }))
+    const history = msgs.filter(m => !m.local && !m.limited).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text.slice(0, 1500) }))
     // Always try the real backend (it may have woken up); fall back only for this message.
     const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), status === 'online' ? 60000 : 90000)
     try {
@@ -41,7 +62,7 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
       if (!r.ok) throw new Error()
       const d = await r.json()
       setStatus('online')
-      setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources }])
+      setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources, trace: d.trace, cached: d.cached, limited: d.limited }])
     } catch { setStatus('local'); local() }
     finally { clearTimeout(timer); setBusy(false) }
   }
@@ -59,17 +80,19 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
               <div key={i} className={`msg ${m.role}`}>
                 {m.local && <small className="fallback">{t.fallbackNote}</small>}
                 <span style={{ whiteSpace: 'pre-line' }}><Rich text={m.text} /></span>
+                <Trace m={m} t={t} />
                 {(() => { const n = [...new Set((m.sources || []).map(s => (s.source || '').replace(/\.md$/, '')).filter(Boolean))]; return n.length > 0 && <div className="srcs">{t.sources}: {n.map(x => <span key={x}>{x}</span>)}</div> })()}
               </div>))}
             {busy && <div className="msg bot typing">{status !== 'online' ? t.waking : t.thinking}</div>}
             {status === 'checking' && !busy && msgs.length === 0 && <p className="hint">{t.waking}</p>}
-            {msgs.length === 0 && <div className="sugg">{t.suggestions.map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</div>}
+            {!busy && <div className="sugg">{t.suggestions.filter(s => !msgs.some(m => m.role === 'user' && m.text === s)).map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</div>}
             <div ref={end} />
           </div>
           <form className="chat-input" onSubmit={e => { e.preventDefault(); ask() }}>
-            <input aria-label={t.placeholder} value={q} onChange={e => setQ(e.target.value)} placeholder={t.placeholder} maxLength={500} />
+            <input aria-label={t.placeholder} value={q} onChange={e => setQ(e.target.value)} placeholder={t.placeholder} maxLength={MAX_Q} />
             <button disabled={busy}>{t.send}</button>
           </form>
+          <small className="limit-note">{t.limitNote}{q.length > 200 ? ` · ${q.length}/${MAX_Q}` : ''}</small>
         </div>)}
     </>
   )

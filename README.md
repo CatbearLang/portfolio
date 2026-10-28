@@ -40,6 +40,9 @@ flowchart LR
 - **Memory:** the browser sends the last 6 turns; used by the router, for follow-up retrieval and in the answer prompt.
 - **Retrieval:** hybrid of BM25 (60%) and hashed bag-of-words vectors in a FAISS flat index (40%). No neural embedding model on the free 512 MB instance (`EMBEDDER=fastembed` is optional locally).
 - **Pluggable LLM:** any OpenAI-compatible endpoint via env vars; `LLM_PROVIDER=fake` for demos/tests.
+- **Agent trace:** every response includes `trace` (nodes executed, retrieved chunk titles + scores, grounding verdict) and the cited snippets; the widget shows them in a collapsible "Agent trace".
+- **Cost limits:** questions ≤ 300 chars; history ≤ 6 turns × 500 chars; per-IP (X-Forwarded-For) 8 free questions/day + burst 3/min; global 40 LLM questions/day (`IP_DAILY`, `IP_BURST`, `GLOBAL_DAILY`). Suggested questions are precomputed once with the real graph (`python -m scripts.build_suggested` → `data/suggested.json`, also bundled in the frontend) and identical questions hit an in-memory LRU, so both cost 0 API calls. Limits are in-memory (single instance, reset on restart).
+- **Prompt-injection hardening (not a guarantee):** regex prefilter for obvious attempts → polite refusal without calling the LLM; visitor text, history and documents are wrapped in `<user_question>`, `<conversation>`, `<document>` tags that system prompts declare as untrusted data, and tag look-alikes are stripped; the model never receives secrets (the API key only travels in the HTTP header); the model has no tools, so injected text can at worst change wording, which the grounding check then screens. It is not injection-proof.
 - **Safe errors:** provider errors become a generic 502; keys never reach the browser or logs.
 - **Graceful degradation:** if the backend is asleep or fails, that single message is answered by an in-browser keyword search, labeled as a no-AI fallback; the next message tries the backend again.
 

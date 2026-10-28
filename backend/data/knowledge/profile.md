@@ -45,7 +45,9 @@ The chat assistant on this site is Lian's LangGraph + RAG project. It is a FastA
 - answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];
 - check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with stricter instructions, otherwise the assistant says it doesn't have that information.
 
-It keeps short conversation memory: the browser sends the last few turns so follow-up questions work. The frontend is React + Vite on GitHub Pages; if the free backend is asleep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. It is a compact demo, not a production multi-agent system: the graph has one retry loop and no external tools.
+It keeps short conversation memory: the browser sends the last few turns so follow-up questions work. The frontend is React + Vite on GitHub Pages; if the free backend is asleep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. Every answer shows an "agent trace" (which nodes ran, which chunks were retrieved with their scores, whether the grounding check passed) and the exact cited snippets.
+
+Safety and cost limits: questions are limited to 300 characters; each visitor gets 8 free questions per day with a short burst limit, plus a global daily cap; the suggested questions are answered from answers precomputed once by the real graph (zero API calls), and repeated questions are served from a cache. Prompt-injection hardening is layered: a regex prefilter declines obvious attempts ("ignore previous instructions", asking for the system prompt or keys), visitor text and documents are wrapped in delimiters that the prompts treat as data only, the model never receives any secret, and the grounding check rejects answers not supported by the sources. This reduces risk but is not "injection-proof". It is a compact demo, not a production multi-agent system: the graph has one retry loop and no external tools.
 
 ## Code availability
 
