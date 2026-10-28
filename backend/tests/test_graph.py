@@ -29,8 +29,8 @@ def test_on_topic_retrieves_and_cites():
 
 def test_off_topic_is_refused():
     out = make().invoke({"question": "What's the weather tomorrow?", "lang": "es"})
-    assert out["route"] == "off_topic"
-    assert out["answer"] == REFUSAL["es"] and out["sources"] == []
+    assert out["route"] == "off_topic" and out["sources"] == []
+    assert [t["node"] for t in out["trace"]] == ["prefilter", "generate_query_or_respond", "direct_reply"]
 
 
 def test_no_sources_means_no_invention():
@@ -50,7 +50,7 @@ def test_knowledge_has_no_private_data():
 
 def test_api(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "fake")
-    monkeypatch.setenv("EMBEDDER", "hash")
+    monkeypatch.setenv("EMBED_BACKEND", "hash")
     monkeypatch.setenv("MIN_SCORE", "0.05")
     import importlib
     import app.main as m
@@ -69,7 +69,7 @@ def test_private_source_code_is_answered_by_llm_path():
 
 def test_write_me_code_is_off_topic_not_code_request():
     out = make().invoke({"question": "podrias hacerme el codigo de una calculadora", "lang": "es"})
-    assert out["intent"] == "off_topic" and out["answer"] == REFUSAL["es"]
+    assert out["intent"] == "direct" and out["route"] == "off_topic" and out["sources"] == []
 
 
 def test_private_data_is_declined():

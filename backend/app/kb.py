@@ -1,4 +1,4 @@
-"""Local knowledge base: markdown -> chunks -> embeddings -> FAISS index."""
+"""Local knowledge base: markdown -> chunks -> model2vec embeddings (FAISS flat index) + BM25 -> hybrid search."""
 from __future__ import annotations
 
 import hashlib
@@ -37,6 +37,19 @@ class HashEmbedder:
                 h = int(hashlib.md5(w.encode()).hexdigest(), 16)
                 out[i, h % self.dim] += 1.0
         return out
+
+
+class Model2VecEmbedder:
+    """Real semantic embeddings from a static model2vec model (minishlab/potion-base-8M: ~30 MB, 256-dim,
+    no torch). Distilled from a sentence transformer, so it captures meaning, not just shared words.
+    It is English-focused: the agent writes its search query in English, and BM25 keeps a bilingual expansion."""
+
+    def __init__(self, model: str):
+        from model2vec import StaticModel
+        self.model = StaticModel.from_pretrained(model)
+
+    def embed(self, texts: list[str]) -> np.ndarray:
+        return np.asarray(self.model.encode(texts), dtype="float32")
 
 
 class FastEmbedder:
@@ -138,4 +151,8 @@ class KnowledgeBase:
 
 
 def make_embedder(kind: str, model: str) -> Embedder:
-    return HashEmbedder() if kind == "hash" else FastEmbedder(model)
+    if kind == "hash":
+        return HashEmbedder()
+    if kind == "fastembed":
+        return FastEmbedder(model)
+    return Model2VecEmbedder(model)

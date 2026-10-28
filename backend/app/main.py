@@ -80,7 +80,7 @@ def notice(kind: str, lang: str, node: str, **fmt) -> ChatOut:
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>route>retrieve>grade_documents(>rewrite_question>retrieve)>answer>check",
+    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>generate_query_or_respond>tools>grade_documents(>rewrite_question)>answer>check", "embeddings": settings.embed_model,
             "memory": True, "max_question": MAX_Q, "suggested": len(cache.suggested)}
 
 

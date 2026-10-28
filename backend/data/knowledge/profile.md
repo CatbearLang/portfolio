@@ -39,10 +39,10 @@ Spanish (native), English (intermediate).
 
 The chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:
 
-- prefilter: fast regex rules catch obvious requests for personal data or for project source code;
-- route: an LLM classifies everything else as a question about Lian, a source-code request, or off-topic (off-topic questions such as "write me a calculator" are politely declined);
-- retrieve: hybrid search over Lian's project documents, combining BM25 keyword scoring with hashed bag-of-words vectors in an in-memory FAISS index (no neural embedding model, to fit the 512 MB free Render instance);
-- grade_documents: one LLM call grades the retrieved chunks and keeps only relevant ones; if none are relevant, rewrite_question reformulates the search query and retrieves again (at most once), following the official LangGraph agentic RAG pattern;
+- prefilter: fast regex rules catch obvious prompt-injection attempts, requests for personal data, and requests for project source code;
+- generate_query_or_respond: an LLM (built with LangChain's ChatOpenAI and bind_tools) decides whether to call the search_portfolio_docs retriever tool with an English search query, or to reply directly with a short polite refusal when the question is not about Lian (e.g. "write me a calculator"); the direct reply is sanitized (short, no code, no links). If the model's tool calling fails, a plain-text LLM router is used as a fallback;
+- tools: a LangGraph ToolNode runs the retriever tool: hybrid search over Lian's project documents, combining BM25 keyword scoring (60%) with real semantic embeddings from a small static model2vec model, minishlab/potion-base-8M, in an in-memory FAISS index (40%); the whole backend uses about 200 MB of RAM;
+- grade_documents: one LLM call grades the retrieved chunks and keeps only relevant ones; if none are relevant, rewrite_question reformulates the question and sends it back to the agent to search again (at most once), following the official LangGraph agentic RAG tutorial;
 - answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];
 - check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with stricter instructions, otherwise the assistant says it doesn't have that information.
 

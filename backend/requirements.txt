@@ -1,7 +1,11 @@
 fastapi==0.115.*
 uvicorn[standard]
-langgraph>=0.2
-# fastembed>=0.4  # optional (EMBEDDER=fastembed); not installed on Render free (512 MB)
+langgraph>=1.0
+langchain-core>=1.0
+langchain-openai>=1.0
+model2vec>=0.6
+# fastembed>=0.4  # optional (EMBED_BACKEND=fastembed); too heavy for Render free (512 MB)
 faiss-cpu>=1.8
 httpx>=0.27
 pydantic>=2.7
+numpy
