@@ -5,7 +5,6 @@ Lian Yang is an Informatics Engineering candidate (thesis stage) based in Paragu
 ## Contact
 
 - GitHub: https://github.com/CatbearLang
-- Email: Catbeardarkworld@gmail.com
 
 ## Summary
 

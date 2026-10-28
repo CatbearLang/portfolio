@@ -6,18 +6,18 @@ import { projects, education, experience, GITHUB } from './content.js'
 
 const LINKEDIN = 'https://www.linkedin.com/in/lianyang-dev'
 const P = slug => projects.find(p => p.slug === slug)
-const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.tagline} ${c.context}\n\n${l === 'es' ? 'Cómo funciona' : 'How it works'}:\n• ${c.how.join('\n• ')}` }
+const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.tagline}\n\n${l === 'es' ? 'Ejemplo' : 'For example'}: ${c.how[0]}` }
 
 const intents = [
   { id: 'glossub', src: 'glossub.md', kw: 'glossub series serie watching viendo learn aprender subtitles subtitulos subtítulos bilingual bilingues idiomas language learning whisper',
-    en: () => proj('glossub', 'en') + '\n\nHighlights: ' + P('glossub').en.highlights.join('; ') + '.',
-    es: () => proj('glossub', 'es') + '\n\nPuntos clave: ' + P('glossub').es.highlights.join('; ') + '.' },
+    en: () => `GlosSub: ${P('glossub').en.tagline}\n\n• Video is processed locally; text may go to the configured LLM provider.\n• Colors are in the ASS export; SRT is plain text.`,
+    es: () => `GlosSub: ${P('glossub').es.tagline}\n\n• El video se procesa localmente; el texto puede ir al proveedor de LLM configurado.\n• Los colores están en el ASS; el SRT es solo texto.` },
   { id: 'stickman', src: 'codex-stickman-pipeline.md', kw: 'stickman codex pipeline video videos explainer explicativo tts ffmpeg cost costo costos budget presupuesto',
-    en: () => proj('codex-stickman-pipeline', 'en') + '\n\nHow it was built:\n• ' + P('codex-stickman-pipeline').en.built.join('\n• ') + `\n\nCode: ${GITHUB}/codex-stickman-pipeline`,
-    es: () => proj('codex-stickman-pipeline', 'es') + '\n\nCómo se hizo:\n• ' + P('codex-stickman-pipeline').es.built.join('\n• ') + `\n\nCódigo: ${GITHUB}/codex-stickman-pipeline` },
+    en: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').en.tagline} ${P('codex-stickman-pipeline').en.context}\n\n• ${P('codex-stickman-pipeline').en.built[1]}\n\nCode: ${GITHUB}/codex-stickman-pipeline`,
+    es: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').es.tagline} ${P('codex-stickman-pipeline').es.context}\n\n• ${P('codex-stickman-pipeline').es.built[1]}\n\nCódigo: ${GITHUB}/codex-stickman-pipeline` },
   { id: 'arcane', src: 'arcane-knockout.md', kw: 'arcane knockout unity game juego videojuego wizard magos multiplayer art arte generated generadas',
-    en: () => proj('arcane-knockout', 'en') + '\n\nRole: ' + P('arcane-knockout').en.built[0],
-    es: () => proj('arcane-knockout', 'es') + '\n\nRol: ' + P('arcane-knockout').es.built[0] },
+    en: () => `Arcane Knockout: ${P('arcane-knockout').en.tagline}\n\n${P('arcane-knockout').en.built[0]}`,
+    es: () => `Arcane Knockout: ${P('arcane-knockout').es.tagline}\n\n${P('arcane-knockout').es.built[0]}` },
   { id: 'projects', src: 'profile.md', kw: 'projects proyectos portfolio work trabajos hecho built made',
     en: () => 'Lian\'s featured projects are:\n' + projects.map(p => `• ${p.name}: ${p.en.tagline}`).join('\n') + '\n\nThis chat assistant is also a project: the full version is a FastAPI + LangGraph RAG agent over his project docs.',
     es: () => 'Los proyectos destacados de Lian son:\n' + projects.map(p => `• ${p.name}: ${p.es.tagline}`).join('\n') + '\n\nEste asistente también es un proyecto: la versión completa es un agente RAG con FastAPI + LangGraph sobre la documentación de sus proyectos.' },
@@ -47,8 +47,35 @@ const opts = { fields: ['title', 'text', 'kw'], storeFields: ['id'], processTerm
 const iIdx = new MiniSearch(opts); iIdx.addAll(intents.map(i => ({ id: i.id, title: i.id, kw: i.kw, text: '' })))
 const cIdx = new MiniSearch(opts); cIdx.addAll(kb.map(c => ({ ...c, kw: '' })))
 
+
+// Guard before retrieval (mirrors backend/app/guard.py).
+const CODE = /\b(source|codigo|code|repo|repositorio|github|descargar|download|clonar|clone)\b/
+const PRIVATE = /\b(e-?mail|correo|mail|phone|telefono|celular|whatsapp|numero|address|direccion|domicilio|salar\w*|sueldo|pay|password\w*|contrasena\w*|clave|cedula|dni|id card|api key|token)\b/
+const PROFILE = /\b(lian|glossub|stickman|codex|arcane|knockout|portfolio|project\w*|proyecto\w*|stack|skill\w*|habilidad\w*|tecnolog\w*|experien\w*|educa\w*|formacion|estudi\w*|universidad|university|tesis|thesis|work\w*|trabaj\w*|remot\w*|disponib\w*|availab\w*|contact\w*|linkedin|cv|resume|curriculum|ingles|english|idioma\w*|language\w*|serie\w*|subtit\w*|whisper|llm|rag|langgraph|react|python|fastapi|unity|game|juego|assistant|asistente|chatbot|hire|contratar|freelance|role\w*|rol)\b/
+const PORTFOLIO_REPO = `${GITHUB}/portfolio`, STICKMAN_REPO = `${GITHUB}/codex-stickman-pipeline`
+const MSG = {
+  code_private: { en: "I can't share GlosSub's source code: it's a private project. I can tell you how it works or which technologies it uses.", es: 'No puedo compartir el código fuente de GlosSub: es un proyecto privado. Puedo contarte cómo funciona o qué tecnologías usa.' },
+  code_arcane: { en: "I can't share Arcane Knockout's source code: it's a private project. I can tell you how it works or what Lian built.", es: 'No puedo compartir el código fuente de Arcane Knockout: es un proyecto privado. Puedo contarte cómo funciona o qué hizo Lian.' },
+  code_public: { en: `Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio (${PORTFOLIO_REPO}). GlosSub and Arcane Knockout are private.`, es: `Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio (${PORTFOLIO_REPO}). GlosSub y Arcane Knockout son privados.` },
+  private: { en: `I can't share personal data. To contact Lian, use LinkedIn (${LINKEDIN}).`, es: `No puedo compartir datos personales. Para contactar a Lian, usá LinkedIn (${LINKEDIN}).` },
+  off_topic: { en: "I can only answer about Lian's projects and professional profile.", es: 'Solo puedo responder sobre los proyectos y el perfil profesional de Lian.' },
+}
+export function classify(question) {
+  const q = norm(question)
+  if (CODE.test(q)) {
+    if (/stickman|codex|portfolio/.test(q)) return 'code_public'
+    if (/arcane|knockout/.test(q)) return 'code_arcane'
+    if (q.includes('glossub')) return 'code_private'
+    return 'code_public'
+  }
+  if (PRIVATE.test(q)) return 'private'
+  return PROFILE.test(q) ? 'on_topic' : 'off_topic'
+}
+
 export function localAnswer(question, lang = 'en') {
   const l = lang === 'es' ? 'es' : 'en'
+  const g = classify(question)
+  if (g !== 'on_topic') return { answer: MSG[g][l], sources: [] }
   const ih = iIdx.search(question), ch = cIdx.search(question)
   const best = ih[0]
   // Specific doc chunk beats the generic intent only for detailed questions about a project's internals.
@@ -59,7 +86,7 @@ export function localAnswer(question, lang = 'en') {
   }
   if (ch[0] && ch[0].score > 4 && ch[0].queryTerms.length >= Math.min(2, new Set(question.split(/\W+/u).map(norm).filter(t => t.length > 2 && !STOP.has(t))).size)) {
     const c = kb.find(k => k.id === ch[0].id)
-    const text = c.text.split('\n').slice(0, 6).join('\n')
+    const text = c.text.split('\n').slice(0, 3).join('\n')
     const pre = l === 'es' ? `De la documentación de ${c.title} (en inglés):\n` : `From the ${c.title} docs:\n`
     return { answer: pre + text, sources: [{ id: 1, source: c.source, title: c.title }] }
   }

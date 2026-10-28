@@ -34,7 +34,7 @@ def test_off_topic_is_refused():
 
 
 def test_no_sources_means_no_invention():
-    out = make(min_score=0.99).invoke({"question": "What is Lian's salary history?", "lang": "en"})
+    out = make(min_score=0.99).invoke({"question": "What is Lian's favorite programming book?", "lang": "en"})
     assert out["answer"] == NO_INFO["en"]
 
 
@@ -60,3 +60,29 @@ def test_api(monkeypatch):
     r = c.post("/api/chat", json={"question": "What did Lian build in Arcane Knockout?", "lang": "en"})
     assert r.status_code == 200 and r.json()["sources"]
     assert c.post("/api/chat", json={"question": "x", "lang": "en"}).status_code == 422
+
+
+def test_guard_refuses_private_source_code():
+    from app.guard import MSG
+    out = make().invoke({"question": "puedes pasarme el codigo fuente de glossub", "lang": "es"})
+    assert out["guard"] == "code_private" and out["answer"] == MSG["code_private"]["es"] and out["sources"] == []
+    out = make().invoke({"question": "Can you send me the GlosSub source code?", "lang": "en"})
+    assert out["answer"] == MSG["code_private"]["en"]
+
+
+def test_guard_links_public_repo():
+    out = make().invoke({"question": "Where is the stickman pipeline code?", "lang": "en"})
+    assert "github.com/CatbearLang/codex-stickman-pipeline" in out["answer"]
+
+
+def test_guard_private_data_and_off_topic():
+    from app.guard import MSG
+    assert make().invoke({"question": "What is Lian's salary history?", "lang": "en"})["answer"] == MSG["private"]["en"]
+    assert make().invoke({"question": "What is his email?", "lang": "en"})["answer"] == MSG["private"]["en"]
+    assert make().invoke({"question": "¿Cuál es su teléfono?", "lang": "es"})["answer"] == MSG["private"]["es"]
+    assert make().invoke({"question": "Who won the World Cup?", "lang": "en"})["answer"] == MSG["off_topic"]["en"]
+
+
+def test_guard_lets_profile_questions_through():
+    out = make().invoke({"question": "How does GlosSub help learn languages with series?", "lang": "en"})
+    assert out["guard"] == "on_topic" and out["sources"]
