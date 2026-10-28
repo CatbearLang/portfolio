@@ -13,7 +13,7 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
   useEffect(() => {
     if (!open || status === 'online') return
     if (!API) { setStatus('local'); return }
-    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 4000)
+    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 45000) // free server may be waking up
     fetch(`${API}/api/health`, { signal: ctl.signal }).then(r => setStatus(r.ok ? 'online' : 'local')).catch(() => setStatus('local')).finally(() => clearTimeout(timer))
   }, [open])
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs, busy])
@@ -23,14 +23,15 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
     if (question.length < 2 || busy) return
     setQ(''); setMsgs(m => [...m, { role: 'user', text: question }]); setBusy(true)
     const local = () => { const d = localAnswer(question, lang); setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources }]) }
-    if (status !== 'online') { setTimeout(() => { local(); setBusy(false) }, 250); return }
+    if (!API || status === 'local') { setTimeout(() => { local(); setBusy(false) }, 250); return }
+    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 45000)
     try {
-      const r = await fetch(`${API}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, lang }) })
+      const r = await fetch(`${API}/api/chat`, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, lang }) })
       if (!r.ok) throw new Error()
       const d = await r.json()
       setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources }])
     } catch { setStatus('local'); local() }
-    finally { setBusy(false) }
+    finally { clearTimeout(timer); setBusy(false) }
   }
 
 
@@ -47,7 +48,8 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
                 <span style={{ whiteSpace: 'pre-line' }}>{m.text}</span>
                 {(() => { const n = [...new Set((m.sources || []).map(s => (s.source || '').replace(/\.md$/, '')).filter(Boolean))]; return n.length > 0 && <div className="srcs">{t.sources}: {n.map(x => <span key={x}>{x}</span>)}</div> })()}
               </div>))}
-            {busy && <div className="msg bot typing">{t.thinking}</div>}
+            {busy && <div className="msg bot typing">{status === 'checking' ? t.waking : t.thinking}</div>}
+            {status === 'checking' && !busy && msgs.length === 0 && <p className="hint">{t.waking}</p>}
             {msgs.length === 0 && <div className="sugg">{t.suggestions.map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</div>}
             <div ref={end} />
           </div>
