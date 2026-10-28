@@ -11,8 +11,8 @@ export const ui = {
     about: 'Informatics Engineering candidate (thesis stage) from Paraguay with 3 years of hands-on full-stack work in React and PostgreSQL. I design AI workflows (LLMs, speech recognition, TTS, image generation), automate processes with n8n and ship containerized services with Docker and Kubernetes. Open to remote full-stack, backend and AI-automation roles.',
     skillsTitle: 'Skills', projectsTitle: 'Featured projects', expTitle: 'Experience', eduTitle: 'Education',
     contactTitle: 'Let’s talk', contactText: 'Open to remote roles. The fastest way to reach me is email.',
-    readMore: 'Read case study →', back: '← All projects', stack: 'Stack', highlights: 'Key results', context: 'Context', stackL: 'Stack', noRepo: 'Source code available on request.', how: 'How it works', built: 'How it was built', links: 'Links',
-    chat: { title: 'Ask about my work', hint: 'Answers come only from my project docs, with sources.', placeholder: 'e.g. How does GlosSub work?', send: 'Send', offline: 'The assistant is offline right now. Browse the projects below or email me at', thinking: 'Thinking…', sources: 'Sources', suggestions: ['What does GlosSub do?', 'Which parts of Arcane Knockout are AI-generated?', 'How is cost controlled in the stickman pipeline?'] },
+    readMore: 'Read case study →', back: '← All projects', stack: 'Stack', highlights: 'Key results', context: 'Context', stackL: 'Stack', how: 'How it works', built: 'How it was built', links: 'Links',
+    chat: { title: 'Ask about my work', hint: 'Answers come only from my project docs, with sources.', localMode: 'In-browser search', placeholder: 'e.g. How does GlosSub work?', send: 'Send', thinking: 'Thinking…', sources: 'Sources', suggestions: ['What projects has he built?', 'What does GlosSub do?', 'What is his tech stack?', 'Tell me about the Codex Stickman Pipeline', 'Which parts of Arcane Knockout are AI-generated?', 'What is his education?', 'Is he available for remote work?', 'How can I contact him?'] },
     footer: 'Built with React + Vite. Assistant: FastAPI + LangGraph + FAISS.',
   },
   es: {
@@ -24,8 +24,8 @@ export const ui = {
     about: 'Estudiante de Ingeniería en Informática en etapa de tesis, de Paraguay, con 3 años de experiencia práctica full-stack en React y PostgreSQL. Diseño flujos con IA (LLMs, reconocimiento de voz, TTS, generación de imágenes), automatizo procesos con n8n y despliego servicios en contenedores con Docker y Kubernetes. Abierto a roles remotos full-stack, backend y de automatización con IA.',
     skillsTitle: 'Habilidades', projectsTitle: 'Proyectos destacados', expTitle: 'Experiencia', eduTitle: 'Formación',
     contactTitle: 'Hablemos', contactText: 'Disponible para roles remotos. La forma más rápida de contactarme es por email.',
-    readMore: 'Ver caso de estudio →', back: '← Todos los proyectos', stack: 'Stack', highlights: 'Resultados clave', context: 'Contexto', stackL: 'Stack', noRepo: 'Código fuente disponible a pedido.', how: 'Cómo funciona', built: 'Cómo se hizo', links: 'Enlaces',
-    chat: { title: 'Preguntá sobre mi trabajo', hint: 'Responde solo con la documentación de mis proyectos, citando fuentes.', placeholder: 'ej. ¿Cómo funciona GlosSub?', send: 'Enviar', offline: 'El asistente no está disponible ahora. Mirá los proyectos o escribime a', thinking: 'Pensando…', sources: 'Fuentes', suggestions: ['¿Qué hace GlosSub?', '¿Qué partes de Arcane Knockout son generadas con IA?', '¿Cómo controla costos el pipeline stickman?'] },
+    readMore: 'Ver caso de estudio →', back: '← Todos los proyectos', stack: 'Stack', highlights: 'Resultados clave', context: 'Contexto', stackL: 'Stack', how: 'Cómo funciona', built: 'Cómo se hizo', links: 'Enlaces',
+    chat: { title: 'Preguntá sobre mi trabajo', hint: 'Responde solo con la documentación de mis proyectos, citando fuentes.', localMode: 'Búsqueda en el navegador', placeholder: 'ej. ¿Cómo funciona GlosSub?', send: 'Enviar', thinking: 'Pensando…', sources: 'Fuentes', suggestions: ['¿Qué proyectos hizo?', '¿Qué hace GlosSub?', '¿Cuál es su stack?', 'Contame del Codex Stickman Pipeline', '¿Qué partes de Arcane Knockout son generadas con IA?', '¿Qué estudió?', '¿Está disponible para trabajo remoto?', '¿Cómo lo contacto?'] },
     footer: 'Hecho con React + Vite. Asistente: FastAPI + LangGraph + FAISS.',
   },
 }

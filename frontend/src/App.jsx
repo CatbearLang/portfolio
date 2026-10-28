@@ -99,7 +99,6 @@ function ProjectPage({ p, lang, t }) {
       </div>
       <h2>{t.built}</h2><ul>{c.built.map(h => <li key={h}>{h}</li>)}</ul>
       {p.gallery && <div className="gallery">{p.gallery.slice(1).map(g => <img key={g} src={g} alt="" loading="lazy" />)}</div>}
-      {p.links.length === 0 && <p className="muted">{t.noRepo}</p>}
       {p.links.length > 0 && <><h2>{t.links}</h2><div className="cta">{p.links.map(([n, u]) => <a key={u} className="btn" href={u} target="_blank" rel="noreferrer">{n}</a>)}</div></>}
     </article>
   )
