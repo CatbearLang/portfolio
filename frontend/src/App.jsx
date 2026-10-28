@@ -16,7 +16,7 @@ export default function App() {
   const hash = useHash()
   const m = hash.match(/^#\/projects\/([\w-]+)/)
   const project = m && projects.find(p => p.slug === m[1])
-  const cv = `cv/Lian_Yang_CV_${lang.toUpperCase()}.pdf`
+  const cv = `cv/Lian_Yang_CV_${lang.toUpperCase()}.pdf?v=2026-10-28`
 
   return (
     <>

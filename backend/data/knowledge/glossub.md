@@ -41,3 +41,7 @@ Python · FastAPI · Typer · Pydantic · MLX Whisper · FFmpeg · OpenAI-compat
 ## Author
 
 Lian Yang — Full-Stack Developer.
+
+## Web app (from Lian's CV)
+
+GlosSub is shipped as a web app (glossub.shop) supporting five languages in both directions, with sentence replay, a subtitle editor and ASS/SRT export. LLM output is validated with Pydantic and semantic checks before use. On the 23.7-minute sample episode, re-rendering from cache takes under 1 second (99% of cues translated, 89% phrase-alignment coverage).

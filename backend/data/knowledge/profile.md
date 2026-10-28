@@ -1,18 +1,20 @@
 # Lian Yang — Profile
 
-Lian Yang is an Informatics Engineering candidate (thesis stage) based in Paraguay, looking for remote full-stack, backend and AI-automation roles (USA/Canada time zones first; open to other English- or Spanish-speaking teams).
+Lian Yang is a Python & AI Integration Developer (FastAPI · React · LLMs) and Informatics Engineering candidate (thesis stage) based in Encarnación, Paraguay (UTC−3, full US Eastern time overlap), looking for remote full-stack, backend and AI-automation roles (USA/Canada time zones first; open to other English- or Spanish-speaking teams).
 
 ## Contact
 
 - GitHub: https://github.com/CatbearLang
+- LinkedIn: https://www.linkedin.com/in/lianyang-dev
+- Portfolio: https://catbearlang.github.io/portfolio
 
 ## Summary
 
-Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-stack development in React and PostgreSQL. Builds end-to-end AI pipelines (LLMs, speech recognition, TTS, image generation), workflow automations with n8n, and containerized services with Docker and Kubernetes. Ships tested, documented, security-conscious software.
+Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-stack development in React and PostgreSQL. Builds end-to-end AI pipelines (LLMs, speech recognition, TTS, image generation), workflow automations with n8n, and containerized services with Docker and Kubernetes. Ships tested, documented, security-conscious software. From his CV: a Python developer who builds LLM applications end to end (RAG with cited answers, multi-stage AI pipelines, validated structured outputs) with offline tests, cost controls and secure defaults; seeking remote backend, full-stack or AI integration roles with US/Canada teams.
 
 ## Technical skills
 
-- Frontend: React, JavaScript, HTML/CSS
+- Frontend: React, JavaScript, Vite, HTML/CSS
 - Backend & data: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs
 - AI & automation: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n
 - DevOps & infrastructure (intermediate): Docker, Kubernetes, server deployment and maintenance, CI/data pipelines, load balancing, distributed systems
@@ -21,8 +23,8 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 
 ## Experience
 
-- Freelance Full-Stack Developer & Open-Source Contributor (3 years): web projects for freelance clients with React frontends, backend services and PostgreSQL; maintenance and debugging of existing applications; open-source projects published on GitHub (github.com/CatbearLang), including Codex Stickman Pipeline.
-- IT Support — Vinader Computación, Encarnación: hardware and software support, installation, configuration, troubleshooting, preventive and corrective maintenance.
+- Freelance Full-Stack Developer & Open-Source Contributor, remote (2023 – present, 3 years): web applications for small-business clients with React frontends, backend services and PostgreSQL; turning client requirements into working features, from data modeling and API design to delivery and post-launch support; diagnosing and fixing issues in existing codebases and shipping incremental updates; open-source projects published on GitHub (github.com/CatbearLang), including Codex Stickman Pipeline.
+- IT Support Technician — Vinader Computación, Encarnación (2017): hardware and software support, installation, configuration, troubleshooting, preventive and corrective maintenance.
 - Cashier — Casa Jorge, Encarnación (5 years): customer service, cash handling and daily register balancing.
 
 ## Education
@@ -33,7 +35,7 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 
 ## Languages
 
-Spanish (native), English (intermediate).
+Spanish (native), English (advanced, as stated in his CV).
 
 ## This portfolio and its AI assistant (LangGraph project)
 
