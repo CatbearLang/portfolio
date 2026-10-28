@@ -86,3 +86,10 @@ def test_guard_private_data_and_off_topic():
 def test_guard_lets_profile_questions_through():
     out = make().invoke({"question": "How does GlosSub help learn languages with series?", "lang": "en"})
     assert out["guard"] == "on_topic" and out["sources"]
+
+
+def test_hybrid_retrieval_finds_profile_stack():
+    kb = KnowledgeBase.from_dir(KDIR, HashEmbedder())
+    for q in ("What is his tech stack?", "¿Cuál es su stack?"):
+        assert kb.search(q, 1)[0][0].source == "profile"
+    assert kb.search("¿Qué estudió Lian?", 1)[0][0].title.endswith("Education")
