@@ -34,6 +34,10 @@ class FakeLLM:
     """Deterministic stand-in: routes by keywords and answers by quoting the first source."""
 
     def complete(self, system: str, user: str) -> str:
+        if "grade retrieved" in system:
+            return "1,2,3,4"
+        if "Rewrite the visitor" in system:
+            return "GlosSub subtitles"
         if "fact-checker" in system:
             return "SUPPORTED"
         if "You route" in system:

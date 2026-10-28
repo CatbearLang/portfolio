@@ -21,8 +21,12 @@ flowchart LR
         P -- unsure --> R[route<br/>LLM: ABOUT_LIAN / CODE_REQUEST / OFF_TOPIC]
         R -- off_topic --> D
         R -- about_lian / code_request --> RET[retrieve<br/>hybrid BM25 + hashed vectors]
-        RET -- no sources --> NI[no_info]
-        RET --> ANS[answer<br/>LLM, numbered sources, cites n]
+        RET -- chunks --> GR[grade_documents<br/>1 LLM call grades all chunks]
+        RET -- no chunks --> RW
+        GR -- relevant --> ANS[answer<br/>LLM, numbered sources, cites n]
+        GR -- none, 1st time --> RW[rewrite_question<br/>LLM reformulates query]
+        RW --> RET
+        GR -- none after rewrite --> NI[no_info]
         ANS --> CH[check<br/>LLM grounding judge]
         CH -- unsupported, 1st time --> ANS
         CH -- unsupported again --> NI
@@ -36,6 +40,8 @@ flowchart LR
 ```
 
 - **Grounded answers:** the answer prompt allows only the numbered sources; a second LLM call checks the answer against them, retries once with stricter instructions, then declines ("I don't have that information").
+- **Agentic RAG loop (as in the official LangGraph agentic-RAG tutorial):** after `retrieve`, `grade_documents` decides relevance and keeps only relevant chunks; if none are relevant, `rewrite_question` reformulates the query and loops back to `retrieve` (max 1 rewrite). Unlike the tutorial (one yes/no call per document) all chunks are graded in one call to save quota.
+- **LLM calls per question:** typical 4 (route, grade, answer, check); max 7 (+ rewrite, + regrade, + one answer retry with re-check); 0 for regex-declined, precomputed or cached questions.
 - **Routing:** cheap regex prefilter for obvious cases, LLM router for everything else (e.g. "write me a calculator" is off-topic, not a code request).
 - **Memory:** the browser sends the last 6 turns; used by the router, for follow-up retrieval and in the answer prompt.
 - **Retrieval:** hybrid of BM25 (60%) and hashed bag-of-words vectors in a FAISS flat index (40%). No neural embedding model on the free 512 MB instance (`EMBEDDER=fastembed` is optional locally).

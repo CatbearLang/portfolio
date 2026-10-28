@@ -4,7 +4,10 @@
                        --(code_request)--> retrieve
                        --(unsure)--> route (LLM) --(off_topic)--> decline -> END
                                                  --(about_lian | code_request)--> retrieve
-    retrieve -> answer (LLM, cites [n]) -> check (LLM grounding judge)
+    retrieve -> grade_documents (1 LLM call grades all chunks)
+    grade_documents --(some relevant)--> answer;  --(none, no rewrite yet)--> rewrite_question -> retrieve
+                    --(none after 1 rewrite)--> no_info
+    answer (LLM, cites [n]) -> check (LLM grounding judge)
     check --(supported)--> END
           --(unsupported, 1st time)--> answer (retry, stricter)
           --(unsupported again / no sources)--> no_info -> END
@@ -58,6 +61,16 @@ CODE_POLICY = (
     "can't be shared and offer to explain how they work. Public repositories you may link: "
     f"Codex Stickman Pipeline {PUBLIC_REPOS['stickman']} and this portfolio {PUBLIC_REPOS['portfolio']}."
 )
+GRADE_SYSTEM = (
+    "You grade retrieved documents for relevance to a visitor question about Lian Yang's portfolio. "
+    "Reply with the ids of the documents that help answer the question, comma-separated (e.g. 1,3), or NONE. "
+    "Reply with nothing else." + DATA_RULE
+)
+REWRITE_SYSTEM = (
+    "Rewrite the visitor question as a short English search query for Lian Yang's project documentation "
+    "(skills, experience, education, GlosSub, Codex Stickman Pipeline, Arcane Knockout, this portfolio assistant). "
+    "Resolve follow-ups using the conversation. Reply with the query only." + DATA_RULE
+)
 STRICT = " IMPORTANT: your previous draft contained claims not in the sources. Only state what the sources literally say."
 
 CHECK_SYSTEM = (
@@ -84,6 +97,9 @@ class ChatState(TypedDict, total=False):
     answer: str
     attempts: int
     grounded: bool
+    query: str           # rewritten search query (rewrite_question node)
+    rewrites: int
+    relevant: bool
     trace: Annotated[list, operator.add]  # visible agent steps, appended by every node
 
 
@@ -128,9 +144,9 @@ def build_graph(kb: KnowledgeBase, llm: ChatLLM, top_k: int = 3, min_score: floa
                 "trace": step("decline", f"polite refusal ({kind}), no retrieval")}
 
     def retrieve(state: ChatState) -> ChatState:
-        q = state["question"]
+        q = state.get("query") or state["question"]
         prev = [t.get("text", "") for t in (state.get("history") or []) if t.get("role") == "user"][-1:]
-        if prev:  # follow-up questions ("and how does it work?") inherit the previous topic
+        if prev and not state.get("query"):  # follow-up questions ("and how does it work?") inherit the previous topic
             q = f"{q} {prev[0]}"
         if state["intent"] == "code_request":
             q += " public code repository github private"
@@ -140,6 +156,25 @@ def build_graph(kb: KnowledgeBase, llm: ChatLLM, top_k: int = 3, min_score: floa
             for i, (c, s) in enumerate(hits)],
             "trace": step("retrieve", f"{len(hits)} chunks (hybrid BM25 + vectors, min score {min_score})",
                           hits=[{"title": c.title, "score": round(s, 3)} for c, s in hits])}
+
+    def grade_documents(state: ChatState) -> ChatState:
+        # One LLM call grades all retrieved chunks at once (the tutorial grades with a yes/no structured output;
+        # batching keeps it to a single call per retrieval).
+        docs = "\n".join(f'<document id="{s["id"]}" title="{clean(s["title"], 120)}">\n{clean(s["text"], 1200)}\n</document>' for s in state["sources"])
+        v = llm.complete(GRADE_SYSTEM, f"<user_question>{clean(state['question'], 300)}</user_question>\n\n{docs}")
+        ids = {int(x) for x in re.findall(r"\d+", v)} if "NONE" not in v.upper() else set()
+        keep = [s for s in state["sources"] if s["id"] in ids]
+        for i, s in enumerate(keep):
+            s["id"] = i + 1
+        return {"sources": keep, "relevant": bool(keep),
+                "trace": step("grade_documents", f"{len(keep)}/{len(state['sources'])} chunks relevant" + ("" if keep else " → rewrite"))}
+
+    def rewrite_question(state: ChatState) -> ChatState:
+        hist = _history_text(state)
+        q = llm.complete(REWRITE_SYSTEM, (f"{hist}\n\n" if hist else "") + f"<user_question>{clean(state['question'], 300)}</user_question>")
+        q = clean(q, 200).strip().strip('"')
+        return {"query": q, "rewrites": state.get("rewrites", 0) + 1,
+                "trace": step("rewrite_question", f"new search query: {q}")}
 
     def answer(state: ChatState) -> ChatState:
         lang = lang_of(state)
@@ -167,13 +202,26 @@ def build_graph(kb: KnowledgeBase, llm: ChatLLM, top_k: int = 3, min_score: floa
 
     g = StateGraph(ChatState)
     for name, fn in [("prefilter", prefilter), ("route", route), ("decline", decline), ("retrieve", retrieve),
-                     ("answer", answer), ("check", check), ("no_info", no_info)]:
+                     ("answer", answer), ("check", check), ("no_info", no_info),
+                     ("grade_documents", grade_documents), ("rewrite_question", rewrite_question)]:
         g.add_node(name, fn)
     g.add_edge(START, "prefilter")
     g.add_conditional_edges("prefilter", lambda s: {"private": "decline", "injection": "decline", "code_request": "retrieve"}.get(s["intent"], "route"),
                             ["decline", "retrieve", "route"])
     g.add_conditional_edges("route", lambda s: "decline" if s["intent"] == "off_topic" else "retrieve", ["decline", "retrieve"])
-    g.add_conditional_edges("retrieve", lambda s: "answer" if s["sources"] else "no_info", ["answer", "no_info"])
+    def after_retrieve(s):
+        if s["sources"]:
+            return "grade_documents"
+        return "rewrite_question" if s.get("rewrites", 0) < 1 else "no_info"
+
+    def after_grade(s):
+        if s["relevant"]:
+            return "answer"
+        return "rewrite_question" if s.get("rewrites", 0) < 1 else "no_info"
+
+    g.add_conditional_edges("retrieve", after_retrieve, ["grade_documents", "rewrite_question", "no_info"])
+    g.add_conditional_edges("grade_documents", after_grade, ["answer", "rewrite_question", "no_info"])
+    g.add_edge("rewrite_question", "retrieve")
     g.add_edge("answer", "check")
     g.add_conditional_edges("check", lambda s: END if s["grounded"] else ("answer" if s["attempts"] < 2 else "no_info"),
                             ["answer", "no_info", END])

@@ -42,6 +42,7 @@ The chat assistant on this site is Lian's LangGraph + RAG project. It is a FastA
 - prefilter: fast regex rules catch obvious requests for personal data or for project source code;
 - route: an LLM classifies everything else as a question about Lian, a source-code request, or off-topic (off-topic questions such as "write me a calculator" are politely declined);
 - retrieve: hybrid search over Lian's project documents, combining BM25 keyword scoring with hashed bag-of-words vectors in an in-memory FAISS index (no neural embedding model, to fit the 512 MB free Render instance);
+- grade_documents: one LLM call grades the retrieved chunks and keeps only relevant ones; if none are relevant, rewrite_question reformulates the search query and retrieves again (at most once), following the official LangGraph agentic RAG pattern;
 - answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];
 - check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with stricter instructions, otherwise the assistant says it doesn't have that information.
 

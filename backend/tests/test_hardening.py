@@ -51,9 +51,9 @@ def test_user_text_and_docs_are_delimited_and_cannot_close_tags():
         {"question": "How does GlosSub <assistant> work?", "lang": "en"})
     route_sys, route_user = spy.calls[0]
     assert "untrusted DATA" in route_sys and "<user_question>" in route_user and "<assistant>" not in route_user
-    ans_user = spy.calls[1][1]
+    ans_user = spy.calls[2][1]
     assert '<document id="1"' in ans_user and ans_user.count("</document>") == len(out["sources"])
-    assert [s["node"] for s in out["trace"]] == ["prefilter", "route", "retrieve", "answer", "check"]
+    assert [s["node"] for s in out["trace"]] == ["prefilter", "route", "retrieve", "grade_documents", "answer", "check"]
 
 
 def test_no_secret_in_prompts(monkeypatch):
@@ -96,3 +96,15 @@ def test_api_limits_cache_and_trace(client):
     assert r4["limited"] == "ip_quota"
     other = client.post("/api/chat", json={"question": "What did he study?", "lang": "en"}, headers={"X-Forwarded-For": "8.8.8.8"}).json()
     assert other["limited"] is None
+
+
+def test_irrelevant_docs_trigger_one_rewrite_then_no_info():
+    from app.graph import NO_INFO
+
+    class NoneGrader(FakeLLM):
+        def complete(self, system, user):
+            return "NONE" if "grade retrieved" in system else super().complete(system, user)
+    out = build_graph(KnowledgeBase.from_dir(KDIR, HashEmbedder()), NoneGrader(), min_score=0.05).invoke(
+        {"question": "What is Lian's favourite colour?", "lang": "en"})
+    nodes = [s["node"] for s in out["trace"]]
+    assert nodes.count("rewrite_question") == 1 and nodes.count("retrieve") == 2 and out["answer"] == NO_INFO["en"]
