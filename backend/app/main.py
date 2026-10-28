@@ -17,9 +17,15 @@ app = FastAPI(title="Lian Yang portfolio assistant")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
+class Turn(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    text: str = Field(max_length=1500)
+
+
 class ChatIn(BaseModel):
     question: str = Field(min_length=2, max_length=500)
     lang: str = Field(default="en", pattern="^(en|es)$")
+    history: list[Turn] = Field(default_factory=list, max_length=12)
 
 
 class Source(BaseModel):
@@ -42,13 +48,14 @@ def get_graph():
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "provider": settings.llm_provider}
+    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>route>retrieve>answer>check", "memory": True}
 
 
 @app.post("/api/chat", response_model=ChatOut)
 def chat(body: ChatIn):
     try:
-        out = get_graph().invoke({"question": body.question.strip(), "lang": body.lang})
+        out = get_graph().invoke({"question": body.question.strip(), "lang": body.lang,
+                                 "history": [t.model_dump() for t in body.history[-6:]]})
     except Exception:  # never leak provider errors/keys to the browser
         raise HTTPException(status_code=502, detail="assistant_unavailable")
     return ChatOut(answer=out["answer"], sources=[Source(**{k: s[k] for k in ("id", "source", "title")}) for s in out.get("sources", [])])

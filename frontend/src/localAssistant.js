@@ -37,8 +37,8 @@ const intents = [
     en: () => `You can reach Lian on LinkedIn (${LINKEDIN}) or see his code on GitHub (${GITHUB}).`,
     es: () => `Podés contactar a Lian por LinkedIn (${LINKEDIN}) o ver su código en GitHub (${GITHUB}).` },
   { id: 'assistant', src: 'profile.md', kw: 'assistant asistente chatbot bot rag langgraph how you work funcionás funciona this site sitio',
-    en: () => 'This page runs an in-browser version: it searches the same project documents the backend uses and answers from them, with no API key. The full version is a FastAPI backend running a LangGraph agent (route → retrieve → answer with citations) over a FAISS vector index.',
-    es: () => 'Esta página usa una versión en el navegador: busca en los mismos documentos de proyectos que usa el backend y responde con ellos, sin clave de API. La versión completa es un backend FastAPI con un agente LangGraph (enrutar → recuperar → responder con citas) sobre un índice vectorial FAISS.' },
+    en: () => 'The full assistant is Lian\'s LangGraph project: a FastAPI backend running a LangGraph StateGraph (regex prefilter → LLM router → hybrid BM25 + hashed-vector retrieval → LLM answer with citations → LLM grounding check with one retry), using NVIDIA Nemotron via OpenRouter and short conversation memory. You are seeing the simpler in-browser fallback (keyword search, no LLM) because the AI server did not respond.',
+    es: () => 'El asistente completo es el proyecto de LangGraph de Lian: un backend FastAPI con un StateGraph de LangGraph (prefiltro con regex → enrutador LLM → búsqueda híbrida BM25 + vectores hash → respuesta del LLM con citas → verificación de respaldo con un reintento), usando NVIDIA Nemotron vía OpenRouter y memoria corta de conversación. Estás viendo la versión simple en el navegador (búsqueda por palabras, sin LLM) porque el servidor de IA no respondió.' },
 ]
 
 const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -48,27 +48,20 @@ const iIdx = new MiniSearch(opts); iIdx.addAll(intents.map(i => ({ id: i.id, tit
 const cIdx = new MiniSearch(opts); cIdx.addAll(kb.map(c => ({ ...c, kw: '' })))
 
 
-// Guard before retrieval (mirrors backend/app/guard.py).
-const CODE = /\b(source|codigo|code|repo|repositorio|github|descargar|download|clonar|clone)\b/
-const PRIVATE = /\b(e-?mail|correo|mail|phone|telefono|celular|whatsapp|numero|address|direccion|domicilio|salar\w*|sueldo|pay|password\w*|contrasena\w*|clave|cedula|dni|id card|api key|token)\b/
+// Guard before retrieval (mirrors backend/app/guard.py; the backend adds an LLM router on top).
+const CODE_REQUEST = /\b(source code|codigo fuente|repo|repos|repositorio\w*|github|clonar|clone)\b|\b(su|sus|tu|tus|el|del|his|your)\s+(codigo|code)\b(?!\s+(de|para|for|to)\s+(una?|an?)\b)/
+const PRIVATE = /\b(e-?mail|correo|phone|telefono|celular|whatsapp|address|direccion|domicilio|salar\w*|sueldo|password\w*|contrasena\w*|cedula|dni|id card|api key|token)\b/
 const PROFILE = /\b(lian|glossub|stickman|codex|arcane|knockout|portfolio|project\w*|proyecto\w*|stack|skill\w*|habilidad\w*|tecnolog\w*|experien\w*|educa\w*|formacion|estudi\w*|universidad|university|tesis|thesis|work\w*|trabaj\w*|remot\w*|disponib\w*|availab\w*|contact\w*|linkedin|cv|resume|curriculum|ingles|english|idioma\w*|language\w*|serie\w*|subtit\w*|whisper|llm|rag|langgraph|react|python|fastapi|unity|game|juego|assistant|asistente|chatbot|hire|contratar|freelance|role\w*|rol)\b/
 const PORTFOLIO_REPO = `${GITHUB}/portfolio`, STICKMAN_REPO = `${GITHUB}/codex-stickman-pipeline`
 const MSG = {
-  code_private: { en: "I can't share GlosSub's source code: it's a private project. I can tell you how it works or which technologies it uses.", es: 'No puedo compartir el código fuente de GlosSub: es un proyecto privado. Puedo contarte cómo funciona o qué tecnologías usa.' },
-  code_arcane: { en: "I can't share Arcane Knockout's source code: it's a private project. I can tell you how it works or what Lian built.", es: 'No puedo compartir el código fuente de Arcane Knockout: es un proyecto privado. Puedo contarte cómo funciona o qué hizo Lian.' },
-  code_public: { en: `Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio (${PORTFOLIO_REPO}). GlosSub and Arcane Knockout are private.`, es: `Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio (${PORTFOLIO_REPO}). GlosSub y Arcane Knockout son privados.` },
+  code_request: { en: `GlosSub and Arcane Knockout are private, so their source code can't be shared, but I can explain how they work. Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio, including the assistant backend (${PORTFOLIO_REPO}).`, es: `GlosSub y Arcane Knockout son privados, así que su código no se puede compartir, pero puedo explicarte cómo funcionan. Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio, incluido el backend del asistente (${PORTFOLIO_REPO}).` },
   private: { en: `I can't share personal data. To contact Lian, use LinkedIn (${LINKEDIN}).`, es: `No puedo compartir datos personales. Para contactar a Lian, usá LinkedIn (${LINKEDIN}).` },
-  off_topic: { en: "I can only answer about Lian's projects and professional profile.", es: 'Solo puedo responder sobre los proyectos y el perfil profesional de Lian.' },
+  off_topic: { en: 'Sorry, I can only answer questions about Lian, his experience and his projects.', es: 'Perdón, solo puedo responder sobre Lian, su experiencia y sus proyectos.' },
 }
 export function classify(question) {
   const q = norm(question)
-  if (CODE.test(q)) {
-    if (/stickman|codex|portfolio/.test(q)) return 'code_public'
-    if (/arcane|knockout/.test(q)) return 'code_arcane'
-    if (q.includes('glossub')) return 'code_private'
-    return 'code_public'
-  }
   if (PRIVATE.test(q)) return 'private'
+  if (CODE_REQUEST.test(q)) return 'code_request'
   return PROFILE.test(q) ? 'on_topic' : 'off_topic'
 }
 

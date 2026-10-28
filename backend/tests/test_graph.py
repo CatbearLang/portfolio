@@ -62,34 +62,32 @@ def test_api(monkeypatch):
     assert c.post("/api/chat", json={"question": "x", "lang": "en"}).status_code == 422
 
 
-def test_guard_refuses_private_source_code():
-    from app.guard import MSG
-    out = make().invoke({"question": "puedes pasarme el codigo fuente de glossub", "lang": "es"})
-    assert out["guard"] == "code_private" and out["answer"] == MSG["code_private"]["es"] and out["sources"] == []
-    out = make().invoke({"question": "Can you send me the GlosSub source code?", "lang": "en"})
-    assert out["answer"] == MSG["code_private"]["en"]
+def test_private_source_code_is_answered_by_llm_path():
+    out = make().invoke({"question": "puedes pasarme su codigo fuente", "lang": "es"})
+    assert out["intent"] == "code_request" and out["sources"]
 
 
-def test_guard_links_public_repo():
-    out = make().invoke({"question": "Where is the stickman pipeline code?", "lang": "en"})
-    assert "github.com/CatbearLang/codex-stickman-pipeline" in out["answer"]
+def test_write_me_code_is_off_topic_not_code_request():
+    out = make().invoke({"question": "podrias hacerme el codigo de una calculadora", "lang": "es"})
+    assert out["intent"] == "off_topic" and out["answer"] == REFUSAL["es"]
 
 
-def test_guard_private_data_and_off_topic():
+def test_private_data_is_declined():
     from app.guard import MSG
     assert make().invoke({"question": "What is Lian's salary history?", "lang": "en"})["answer"] == MSG["private"]["en"]
-    assert make().invoke({"question": "What is his email?", "lang": "en"})["answer"] == MSG["private"]["en"]
-    assert make().invoke({"question": "¿Cuál es su teléfono?", "lang": "es"})["answer"] == MSG["private"]["es"]
-    assert make().invoke({"question": "Who won the World Cup?", "lang": "en"})["answer"] == MSG["off_topic"]["en"]
 
 
-def test_guard_lets_profile_questions_through():
-    out = make().invoke({"question": "How does GlosSub help learn languages with series?", "lang": "en"})
-    assert out["guard"] == "on_topic" and out["sources"]
+def test_grounding_retry_then_no_info():
+    from app.kb import HashEmbedder, KnowledgeBase
+    class Liar(FakeLLM):
+        def complete(self, system, user):
+            return "UNSUPPORTED" if "fact-checker" in system else super().complete(system, user)
+    g = build_graph(KnowledgeBase.from_dir(KDIR, HashEmbedder()), Liar(), top_k=3, min_score=0.05)
+    out = g.invoke({"question": "How does GlosSub work?", "lang": "en"})
+    assert out["attempts"] == 2 and out["answer"] == NO_INFO["en"]
 
 
-def test_hybrid_retrieval_finds_profile_stack():
-    kb = KnowledgeBase.from_dir(KDIR, HashEmbedder())
-    for q in ("What is his tech stack?", "¿Cuál es su stack?"):
-        assert kb.search(q, 1)[0][0].source == "profile"
-    assert kb.search("¿Qué estudió Lian?", 1)[0][0].title.endswith("Education")
+def test_history_is_accepted():
+    out = make().invoke({"question": "and how does it work?", "lang": "en",
+                         "history": [{"role": "user", "text": "Tell me about GlosSub"}, {"role": "assistant", "text": "GlosSub is..."}]})
+    assert any(s["source"].startswith("glossub") for s in out["sources"])

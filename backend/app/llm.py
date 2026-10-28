@@ -34,10 +34,13 @@ class FakeLLM:
     """Deterministic stand-in: routes by keywords and answers by quoting the first source."""
 
     def complete(self, system: str, user: str) -> str:
-        if "Classify" in system:
-            q = user.lower()
-            off = any(w in q for w in ["weather", "recipe", "bitcoin", "joke", "president", "clima", "receta"])
-            return "OFF_TOPIC" if off else "ON_TOPIC"
+        if "fact-checker" in system:
+            return "SUPPORTED"
+        if "You route" in system:
+            q = user.rsplit("New message:", 1)[-1].lower()
+            off = any(w in q for w in ["weather", "recipe", "bitcoin", "joke", "president", "clima", "receta", "calculadora", "calculator"])
+            code = any(w in q for w in ["code", "codigo", "código"]) and not off
+            return "OFF_TOPIC" if off else "CODE_REQUEST" if code else "ABOUT_LIAN"
         import re
         block = user.split("[1]", 1)[1].split("\n[2]", 1)[0] if "[1]" in user else ""
         lines = [l for l in block.splitlines()[1:] if l.strip() and not l.lstrip().startswith(("#", "|", "```", ">"))]

@@ -35,6 +35,18 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 
 Spanish (native), English (intermediate).
 
-## This portfolio
+## This portfolio and its AI assistant (LangGraph project)
 
-This site's chatbot is itself a project: a FastAPI backend running a LangGraph agent (route → retrieve → answer with citations) over a local FAISS vector index of Lian's project documentation, with free local embeddings (fastembed) and a pluggable OpenAI-compatible LLM.
+The chat assistant on this site is Lian's LangGraph + RAG project. It is a FastAPI backend (Python) that runs a LangGraph StateGraph:
+
+- prefilter: fast regex rules catch obvious requests for personal data or for project source code;
+- route: an LLM classifies everything else as a question about Lian, a source-code request, or off-topic (off-topic questions such as "write me a calculator" are politely declined);
+- retrieve: hybrid search over Lian's project documents, combining BM25 keyword scoring with hashed bag-of-words vectors in an in-memory FAISS index (no neural embedding model, to fit the 512 MB free Render instance);
+- answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];
+- check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with stricter instructions, otherwise the assistant says it doesn't have that information.
+
+It keeps short conversation memory: the browser sends the last few turns so follow-up questions work. The frontend is React + Vite on GitHub Pages; if the free backend is asleep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. It is a compact demo, not a production multi-agent system: the graph has one retry loop and no external tools.
+
+## Code availability
+
+Public repositories: Codex Stickman Pipeline (https://github.com/CatbearLang/codex-stickman-pipeline) and this portfolio, including the assistant backend (https://github.com/CatbearLang/portfolio). GlosSub and Arcane Knockout are private projects, so their source code is not shared, but the assistant can explain how they work.
