@@ -1,6 +1,6 @@
-# GlosSub — Bilingual subtitle generator with cross-language alignment
+# GlosSub — learn languages by watching series
 
-> A command-line and local web tool (Python, FastAPI) that turns videos into bilingual subtitles. It uses FFmpeg to extract audio, Whisper to transcribe with timestamps, and a configurable LLM to translate the dialogue and, optionally, link fragments across languages. It exports ASS with color-coded correspondences, plus SRT and JSON, and reuses intermediate results through caching. Video is processed locally; text may be sent to an external provider depending on the configuration.
+> GlosSub helps people learn languages by watching series. It captures and understands the audio with Whisper, an LLM translates it and generates the subtitles, and then it aligns the words between the original and the translation (color-coded) so learners understand the translation better. Technically, it is a bilingual subtitle generator with cross-language alignment: a command-line and local web tool (Python, FastAPI) that turns videos into bilingual subtitles. It uses FFmpeg to extract audio, Whisper to transcribe with timestamps, and a configurable LLM to translate the dialogue and, optionally, link fragments across languages. It exports ASS with color-coded correspondences, plus SRT and JSON, and reuses intermediate results through caching. Video is processed locally; text may be sent to an external provider depending on the configuration.
 
 ## What it's for
 

@@ -9,7 +9,7 @@ const P = slug => projects.find(p => p.slug === slug)
 const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.tagline} ${c.context}\n\n${l === 'es' ? 'Cómo funciona' : 'How it works'}:\n• ${c.how.join('\n• ')}` }
 
 const intents = [
-  { id: 'glossub', src: 'glossub.md', kw: 'glossub subtitles subtitulos subtítulos bilingual bilingues idiomas language learning whisper',
+  { id: 'glossub', src: 'glossub.md', kw: 'glossub series serie watching viendo learn aprender subtitles subtitulos subtítulos bilingual bilingues idiomas language learning whisper',
     en: () => proj('glossub', 'en') + '\n\nHighlights: ' + P('glossub').en.highlights.join('; ') + '.',
     es: () => proj('glossub', 'es') + '\n\nPuntos clave: ' + P('glossub').es.highlights.join('; ') + '.' },
   { id: 'stickman', src: 'codex-stickman-pipeline.md', kw: 'stickman codex pipeline video videos explainer explicativo tts ffmpeg cost costo costos budget presupuesto',
