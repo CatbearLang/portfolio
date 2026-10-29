@@ -12,9 +12,11 @@ QUESTIONS = [
     ("es", "¿Qué proyecto de LangGraph hizo y cómo funciona?"),
     ("es", "¿Cuál es su stack?"),
     ("es", "¿Cómo ayuda GlosSub a aprender idiomas?"),
+    ("es", "¿Cómo puedo probar GlosSub?"),
     ("en", "What LangGraph project did he build and how does it work?"),
     ("en", "What is his tech stack?"),
     ("en", "How does GlosSub help you learn languages?"),
+    ("en", "How can I try GlosSub?"),
 ]
 
 out_file = Path(__file__).resolve().parent.parent / "data" / "suggested.json"

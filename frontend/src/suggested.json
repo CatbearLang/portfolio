@@ -189,6 +189,69 @@
   }
  },
  {
+  "lang": "es",
+  "question": "¿Cómo puedo probar GlosSub?",
+  "response": {
+   "answer": "Podés probar GlosSub usando la cuenta demo pública para reclutadores: ingresá en https://glossub.shop con el email reviewer@glossub.example y la contraseña GlosSub-Demo-2933c057e4e0 [1].",
+   "trace": [
+    {
+     "node": "prefilter",
+     "detail": "no rule matched → agent"
+    },
+    {
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"GlosSub how to test try demo\")"
+    },
+    {
+     "node": "tools",
+     "detail": "query \"GlosSub how to test try demo\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
+     "hits": [
+      {
+       "title": "GlosSub — learn languages by watching series › Demo account for reviewers",
+       "score": 0.887
+      },
+      {
+       "title": "<div align=\"center\"> › 1) No accounts needed: offline render demo (procedural images + test tones)",
+       "score": 0.665
+      },
+      {
+       "title": "How it was built › Design decisions",
+       "score": 0.377
+      }
+     ]
+    },
+    {
+     "node": "grade_documents",
+     "detail": "2/3 chunks relevant"
+    },
+    {
+     "node": "answer",
+     "detail": "LLM answer from graded sources with citations"
+    },
+    {
+     "node": "check",
+     "detail": "grounded in sources"
+    }
+   ],
+   "sources": [
+    {
+     "id": 1,
+     "source": "glossub",
+     "title": "GlosSub — learn languages by watching series › Demo account for reviewers",
+     "snippet": "## Demo account for reviewers\n\nLian created a public demo account specifically so recruiters and evaluators can try GlosSub. These credentials are meant to be shared:\n\n- Site: https://glossub.shop\n- Email: reviewer@glossub.example\n- Password: GlosSub-Demo-2933c057e4e0",
+     "score": 0.887
+    },
+    {
+     "id": 2,
+     "source": "codex-stickman-pipeline",
+     "title": "<div align=\"center\"> › 1) No accounts needed: offline render demo (procedural images + test tones)",
+     "snippet": "# 1) No accounts needed: offline render demo (procedural images + test tones)\npython tools/demo.py --out demo-local",
+     "score": 0.665
+    }
+   ]
+  }
+ },
+ {
   "lang": "en",
   "question": "What LangGraph project did he build and how does it work?",
   "response": {
@@ -373,6 +436,69 @@
      "title": "GlosSub — learn languages by watching series › GlosSub — learn languages by watching series",
      "snippet": "# GlosSub — learn languages by watching series\n\n> GlosSub helps people learn languages by watching series. It captures and understands the audio with Whisper, an LLM translates it and generates the subtitles, and then it aligns the words between the original and the translation (color-coded) so learners understand the translation better. Technically, it is a bilingual subtitle generator with cross",
      "score": 0.731
+    }
+   ]
+  }
+ },
+ {
+  "lang": "en",
+  "question": "How can I try GlosSub?",
+  "response": {
+   "answer": "You can try GlosSub using the public demo account Lian created for reviewers: go to https://glossub.shop and sign in with email **reviewer@glossub.example** and password **GlosSub-Demo-2933c057e4e0** [1].",
+   "trace": [
+    {
+     "node": "prefilter",
+     "detail": "no rule matched → agent"
+    },
+    {
+     "node": "generate_query_or_respond",
+     "detail": "LLM chose tool search_portfolio_docs(\"GlosSub try demo download\")"
+    },
+    {
+     "node": "tools",
+     "detail": "query \"GlosSub try demo download\" → 3 chunks (hybrid BM25 + model2vec, min score 0.15)",
+     "hits": [
+      {
+       "title": "GlosSub — learn languages by watching series › Demo account for reviewers",
+       "score": 0.888
+      },
+      {
+       "title": "<div align=\"center\"> › 1) No accounts needed: offline render demo (procedural images + test tones)",
+       "score": 0.433
+      },
+      {
+       "title": "GlosSub — Architecture & how it was built › GlosSub — Architecture & how it was built",
+       "score": 0.345
+      }
+     ]
+    },
+    {
+     "node": "grade_documents",
+     "detail": "2/3 chunks relevant"
+    },
+    {
+     "node": "answer",
+     "detail": "LLM answer from graded sources with citations"
+    },
+    {
+     "node": "check",
+     "detail": "grounded in sources"
+    }
+   ],
+   "sources": [
+    {
+     "id": 1,
+     "source": "glossub",
+     "title": "GlosSub — learn languages by watching series › Demo account for reviewers",
+     "snippet": "## Demo account for reviewers\n\nLian created a public demo account specifically so recruiters and evaluators can try GlosSub. These credentials are meant to be shared:\n\n- Site: https://glossub.shop\n- Email: reviewer@glossub.example\n- Password: GlosSub-Demo-2933c057e4e0",
+     "score": 0.888
+    },
+    {
+     "id": 2,
+     "source": "codex-stickman-pipeline",
+     "title": "<div align=\"center\"> › 1) No accounts needed: offline render demo (procedural images + test tones)",
+     "snippet": "# 1) No accounts needed: offline render demo (procedural images + test tones)\npython tools/demo.py --out demo-local",
+     "score": 0.433
     }
    ]
   }

@@ -8,7 +8,11 @@ const LINKEDIN = 'https://www.linkedin.com/in/lianyang-dev'
 const P = slug => projects.find(p => p.slug === slug)
 const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.tagline}\n\n${l === 'es' ? 'Ejemplo' : 'For example'}: ${c.how[0]}` }
 
+const DEMO_EN = 'You can try GlosSub with the public demo account Lian created for reviewers:\n• Site: https://glossub.shop\n• Email: reviewer@glossub.example\n• Password: GlosSub-Demo-2933c057e4e0'
+const DEMO_ES = 'Podés probar GlosSub con la cuenta demo pública que Lian creó para evaluadores:\n• Sitio: https://glossub.shop\n• Email: reviewer@glossub.example\n• Contraseña: GlosSub-Demo-2933c057e4e0'
 const intents = [
+  { id: 'demo', src: 'glossub.md', kw: 'demo try probar prueba reviewer evaluador evaluadores account cuenta login acceso access password contraseña credentials credenciales',
+    en: () => DEMO_EN, es: () => DEMO_ES },
   { id: 'glossub', src: 'glossub.md', kw: 'glossub series serie watching viendo learn aprender subtitles subtitulos subtítulos bilingual bilingues idiomas language learning whisper',
     en: () => `GlosSub: ${P('glossub').en.tagline}\n\n• Video is processed locally; text may go to the configured LLM provider.\n• Colors are in the ASS export; SRT is plain text.`,
     es: () => `GlosSub: ${P('glossub').es.tagline}\n\n• El video se procesa localmente; el texto puede ir al proveedor de LLM configurado.\n• Los colores están en el ASS; el SRT es solo texto.` },
@@ -52,6 +56,7 @@ const cIdx = new MiniSearch(opts); cIdx.addAll(kb.map(c => ({ ...c, kw: '' })))
 const CODE_REQUEST = /\b(source code|codigo fuente|repo|repos|repositorio\w*|github|clonar|clone)\b|\b(su|sus|tu|tus|el|del|his|your)\s+(codigo|code)\b(?!\s+(de|para|for|to)\s+(una?|an?)\b)/
 const PRIVATE = /\b(e-?mail|correo|phone|telefono|celular|whatsapp|address|direccion|domicilio|salar\w*|sueldo|password\w*|contrasena\w*|cedula|dni|id card|api key|token)\b/
 const PROFILE = /\b(lian|glossub|stickman|codex|arcane|knockout|portfolio|project\w*|proyecto\w*|stack|skill\w*|habilidad\w*|tecnolog\w*|experien\w*|educa\w*|formacion|estudi\w*|universidad|university|tesis|thesis|work\w*|trabaj\w*|remot\w*|disponib\w*|availab\w*|contact\w*|linkedin|cv|resume|curriculum|ingles|english|idioma\w*|language\w*|serie\w*|subtit\w*|whisper|llm|rag|langgraph|react|python|fastapi|unity|game|juego|assistant|asistente|chatbot|hire|contratar|freelance|role\w*|rol)\b/
+const DEMO = /\b(demo|reviewer\w*|evaluador\w*|probar|try|test account|cuenta de prueba|login|acceso|access)\b/
 const PORTFOLIO_REPO = `${GITHUB}/portfolio`, STICKMAN_REPO = `${GITHUB}/codex-stickman-pipeline`
 const MSG = {
   code_request: { en: `GlosSub and Arcane Knockout are private, so their source code can't be shared, but I can explain how they work. Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio, including the assistant backend (${PORTFOLIO_REPO}).`, es: `GlosSub y Arcane Knockout son privados, así que su código no se puede compartir, pero puedo explicarte cómo funcionan. Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio, incluido el backend del asistente (${PORTFOLIO_REPO}).` },
@@ -60,6 +65,8 @@ const MSG = {
 }
 export function classify(question) {
   const q = norm(question)
+  // Public GlosSub reviewer demo account (shared on purpose); API keys/tokens/system prompt stay blocked.
+  if (DEMO.test(q) && !/\b(api key|token|system prompt|source code|codigo fuente)\b/.test(q)) return 'demo'
   if (PRIVATE.test(q)) return 'private'
   if (CODE_REQUEST.test(q)) return 'code_request'
   return PROFILE.test(q) ? 'on_topic' : 'off_topic'
@@ -68,6 +75,8 @@ export function classify(question) {
 export function localAnswer(question, lang = 'en') {
   const l = lang === 'es' ? 'es' : 'en'
   const g = classify(question)
+  if (g === 'demo' && /glossub|demo|reviewer|evaluador|cuenta|account/.test(norm(question))) return { answer: l === 'es' ? DEMO_ES : DEMO_EN, sources: [{ id: 1, source: 'glossub.md', title: 'demo' }] }
+  if (g === 'demo') return localAnswer(question.replace(/\b(try|probar)\b/gi, ''), lang)
   if (g !== 'on_topic') return { answer: MSG[g][l], sources: [] }
   const ih = iIdx.search(question), ch = cIdx.search(question)
   const best = ih[0]

@@ -36,6 +36,9 @@ INJECTION = re.compile(
     r"|(reveal|show|print|leak|dime|mostra\w*|revela\w*)\b.{0,30}\b(key|clave|secret\w*|secreto\w*|env\w*|config\w*)"
 )
 
+# The GlosSub reviewer demo account is public on purpose (glossub.md); asking for it is allowed.
+DEMO = re.compile(r"\b(demo|reviewer\w*|evaluador\w*|probar|try|test account|cuenta de prueba|login|acceso|access)\b")
+
 MSG = {
     "injection": {
         "en": "I can't follow instructions that try to change how I work. I can answer questions about Lian and his projects.",
@@ -55,6 +58,8 @@ MSG = {
 def prefilter(question: str) -> str | None:
     """Return 'injection', 'private', 'code_request' or None (= let the LLM router decide)."""
     q = norm(question)
+    if DEMO.search(q) and not INJECTION.search(q) and not re.search(r"\b(api key|token|system prompt|source code|codigo fuente)\b", q):
+        return None  # public GlosSub reviewer demo account: let the agent answer from glossub.md
     if INJECTION.search(q):
         return "injection"
     if PRIVATE.search(q):
