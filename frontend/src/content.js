@@ -85,15 +85,16 @@ export const projects = [
   {
     slug: 'elf-reader', name: 'ELF Reader', accent: '#16a34a',
     cover: 'reader', image: 'img/elf-reader/cover.webp',
-    imageAlt: { en: 'ELF Reader reading a book aloud on an Android phone', es: 'ELF Reader leyendo un libro en voz alta en un teléfono Android' },
-    video: 'img/elf-reader/demo.mp4',
+    imageAlt: { en: 'ELF Reader banner with the app icon and the line Your books, narrated offline', es: 'Banner de ELF Reader con el ícono de la app y la frase Your books, narrated offline' },
+    icon: 'img/elf-reader/icon.webp',
+    video: 'img/elf-reader/demo.mp4', poster: 'img/elf-reader/demo-poster.webp', videoShape: 'phone',
+    videoAlt: { en: 'Screen recording: opening a book from the library and playing a chapter aloud', es: 'Grabación de pantalla: abrir un libro desde la biblioteca y escuchar un capítulo en voz alta' },
     gallery: [
       ['img/elf-reader/library.webp', { en: 'Library with imported books', es: 'Biblioteca con libros importados' }],
       ['img/elf-reader/reader.webp', { en: 'Reading view while the book is read aloud', es: 'Vista de lectura mientras el libro se lee en voz alta' }],
       ['img/elf-reader/voice.webp', { en: 'Voice and playback settings', es: 'Ajustes de voz y reproducción' }],
       ['img/elf-reader/ambience.webp', { en: 'Animated background and ambient sounds', es: 'Fondo animado y sonidos ambientales' }],
       ['img/elf-reader/gallery.webp', { en: 'Illustration gallery', es: 'Galería de ilustraciones' }],
-      ['img/elf-reader/sleep-timer.webp', { en: 'Sleep timer', es: 'Temporizador para dormir' }],
     ],
     audio: [
       ['audio/elf-reader/sample-en.mp3', { en: 'Sample narration in English, generated on the phone', es: 'Narración de ejemplo en inglés, generada en el teléfono' }],
