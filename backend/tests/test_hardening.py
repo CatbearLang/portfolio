@@ -76,7 +76,7 @@ def test_quotas_ip_burst_global():
 
 @pytest.fixture
 def client(monkeypatch):
-    for k, v in {"LLM_PROVIDER": "fake", "EMBED_BACKEND": "hash", "MIN_SCORE": "0.05", "IP_DAILY": "2", "IP_BURST": "5"}.items():
+    for k, v in {"LLM_PROVIDER": "fake", "EMBED_BACKEND": "hash", "RETRIEVAL_MIN_SCORE": "0.05", "IP_DAILY": "2", "IP_BURST": "5"}.items():
         monkeypatch.setenv(k, v)
     import app.main as m
     importlib.reload(m)

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { localAnswer } from './localAssistant.js'
+import { parseCommands } from './intents.js'
+import { runActions } from './pageActions.js'
 import suggested from './suggested.json'
 
 const MAX_Q = 300
-const keyOf = (q, l) => `${l}:${q.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean).join(' ')}`
+const keyOf = (q, l) => `${l}:${q.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean).join(' ')}`
 const PRE = Object.fromEntries(suggested.map(i => [keyOf(i.question, i.lang), i.response]))
 
 function Trace({ m, t }) {
@@ -28,20 +30,40 @@ function Rich({ text }) {
     : /^\*\*[^*]+\*\*$/.test(p) ? <b key={i}>{p.slice(2, -2)}</b> : p)
 }
 
-export default function ChatWidget({ lang, t, open, setOpen }) {
+const narrow = () => window.matchMedia?.('(max-width: 760px)').matches
+
+export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
+  const t = tAll.chat
   const [status, setStatus] = useState(API ? 'checking' : 'local') // checking | online | local
   const [msgs, setMsgs] = useState([])
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
+  const [toast, setToast] = useState('')
   const end = useRef(null)
+  const tRef = useRef(tAll)
+  tRef.current = tAll
 
-  useEffect(() => {
-    if (!open || status === 'online') return
+  // Wake the free backend as soon as the page loads (not when the chat opens), so it is ready by the first question.
+  const ping = () => {
     if (!API) { setStatus('local'); return }
     const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 75000) // free server may be waking up (~1 min)
     fetch(`${API}/api/health`, { signal: ctl.signal }).then(r => setStatus(r.ok ? 'online' : 'local')).catch(() => setStatus('local')).finally(() => clearTimeout(timer))
-  }, [open])
-  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs, busy])
+  }
+  useEffect(ping, [])
+  useEffect(() => { if (open && status === 'local' && API) ping() }, [open])
+  useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, busy])
+  useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''), 4500); return () => clearTimeout(id) }, [toast])
+
+  async function perform(actions, extra) {
+    // On phones the chat covers the page: get out of the way so the visitor sees the cursor work.
+    const hide = narrow()
+    if (hide) setOpen(false)
+    await new Promise(r => setTimeout(r, hide ? 250 : 0))
+    let text = ''
+    try { text = await runActions(actions, tRef.current) } catch { text = '' }
+    if (hide && text) setToast(text)
+    setMsgs(m => [...m, { role: 'bot', text: text || extra.fallbackText || '', actions, ...extra }])
+  }
 
   async function ask(text) {
     const question = (text ?? q).trim()
@@ -51,41 +73,53 @@ export default function ChatWidget({ lang, t, open, setOpen }) {
     const pre = PRE[keyOf(question, lang)]
     if (pre) { setMsgs(m => [...m, { role: 'user', text: question }, { role: 'bot', text: pre.answer, sources: pre.sources, trace: pre.trace, cached: 'suggested' }]); return }
     setMsgs(m => [...m, { role: 'user', text: question }]); setBusy(true)
+    const commands = parseCommands(question, lang)
+    const localCmd = () => perform(commands, { local: true, cmd: true, trace: [{ node: 'browser', detail: t.localTrace }] })
     const local = () => { const d = localAnswer(question, lang); setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources, local: Boolean(API) }]) }
-    if (!API) { setTimeout(() => { local(); setBusy(false) }, 250); return }
-    // Conversation memory: last 6 AI turns (fallback answers are not sent back).
-    const history = msgs.filter(m => !m.local && !m.limited).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text.slice(0, 1500) }))
-    // Always try the real backend (it may have woken up); fall back only for this message.
-    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), status === 'online' ? 60000 : 90000)
     try {
-      const r = await fetch(`${API}/api/chat`, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, lang, history }) })
-      if (!r.ok) throw new Error()
-      const d = await r.json()
-      setStatus('online')
+      // Server not ready (asleep, waking up or unreachable): obvious page commands run right away in the browser.
+      if (commands.length && status !== 'online') { await localCmd(); return }
+      if (!API) { await new Promise(r => setTimeout(r, 250)); local(); return }
+      // Conversation memory: last 6 AI turns (fallback answers are not sent back).
+      const history = msgs.filter(m => !m.local && !m.limited).slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text.slice(0, 1500) }))
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), status === 'online' ? 60000 : 90000)
+      let d
+      try {
+        const r = await fetch(`${API}/api/chat`, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, lang, history }) })
+        if (!r.ok) throw new Error()
+        d = await r.json()
+        setStatus('online')
+      } catch { setStatus('local'); if (commands.length) await localCmd(); else local(); return } finally { clearTimeout(timer) }
+      if (d.actions?.length) { await perform(d.actions, { trace: d.trace, cached: d.cached, fallbackText: d.answer }); return }
+      // Out of free quota, or the model answered without a page tool: the in-browser matcher still handles commands.
+      if (commands.length && (d.limited || !d.sources?.length)) { await localCmd(); return }
       setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources, trace: d.trace, cached: d.cached, limited: d.limited }])
-    } catch { setStatus('local'); local() }
-    finally { clearTimeout(timer); setBusy(false) }
+    } finally { setBusy(false) }
   }
 
-
+  const unused = list => list.filter(s => !msgs.some(m => m.role === 'user' && m.text === s))
   return (
     <>
+      {toast && !open && <div className="chat-toast" role="status">{toast}</div>}
       <button className="fab" onClick={() => setOpen(!open)} aria-label={t.title} aria-expanded={open}>{open ? '×' : <><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>{t.title}</span></>}</button>
       {open && (
         <div className="chat" role="dialog" aria-label={t.title}>
-          <div className="chat-head"><div><b>{t.title}</b><small><i className={`dot ${status}`} />{status === 'online' ? t.aiMode : status === 'local' ? t.localMode : '…'}</small></div></div>
+          <div className="chat-head"><div><b>{t.title}</b><small><i className={`dot ${status}`} />{status === 'online' ? t.aiMode : status === 'local' ? t.localMode : t.waking}</small></div></div>
           <div className="chat-body" aria-live="polite">
             <p className="hint">{t.hint}</p>
             {msgs.map((m, i) => (
-              <div key={i} className={`msg ${m.role}`}>
-                {m.local && <small className="fallback">{t.fallbackNote}</small>}
+              <div key={i} className={`msg ${m.role}${m.actions ? ' did' : ''}`}>
+                {m.local && !m.cmd && <small className="fallback">{t.fallbackNote}</small>}
+                {m.cmd && <small className="fallback">{t.localCmd}</small>}
                 <span style={{ whiteSpace: 'pre-line' }}><Rich text={m.text} /></span>
                 <Trace m={m} t={t} />
                 {(() => { const n = [...new Set((m.sources || []).map(s => (s.source || '').replace(/\.md$/, '')).filter(Boolean))]; return n.length > 0 && <div className="srcs">{t.sources}: {n.map(x => <span key={x}>{x}</span>)}</div> })()}
               </div>))}
-            {busy && <div className="msg bot typing">{status !== 'online' ? t.waking : t.thinking}</div>}
-            {status === 'checking' && !busy && msgs.length === 0 && <p className="hint">{t.waking}</p>}
-            {!busy && <div className="sugg">{t.suggestions.filter(s => !msgs.some(m => m.role === 'user' && m.text === s)).map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</div>}
+            {busy && <div className="msg bot typing">{status === 'checking' ? t.waking : t.thinking}</div>}
+            {!busy && <div className="sugg">
+              {unused(t.commands).length > 0 && <><small>{t.commandsLabel}</small>{unused(t.commands).map(s => <button key={s} className="cmd" onClick={() => ask(s)}>{s}</button>)}</>}
+              {unused(t.suggestions).length > 0 && <><small>{t.questionsLabel}</small>{unused(t.suggestions).map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</>}
+            </div>}
             <div ref={end} />
           </div>
           <form className="chat-input" onSubmit={e => { e.preventDefault(); ask() }}>

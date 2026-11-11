@@ -2,9 +2,8 @@
 // plus BM25-style retrieval (MiniSearch) over the same knowledge docs the RAG backend indexes.
 import MiniSearch from 'minisearch'
 import kb from './kb.json'
-import { projects, education, experience, GITHUB } from './content.js'
+import { projects, education, experience, GITHUB, LINKEDIN } from './content.js'
 
-const LINKEDIN = 'https://www.linkedin.com/in/lianyang-dev'
 const P = slug => projects.find(p => p.slug === slug)
 const proj = (slug, l) => { const p = P(slug), c = p[l]; return `${p.name}: ${c.tagline}\n\n${l === 'es' ? 'Ejemplo' : 'For example'}: ${c.how[0]}` }
 
@@ -19,15 +18,18 @@ const intents = [
   { id: 'stickman', src: 'codex-stickman-pipeline.md', kw: 'stickman codex pipeline video videos explainer explicativo tts ffmpeg cost costo costos budget presupuesto',
     en: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').en.tagline} ${P('codex-stickman-pipeline').en.context}\n\n• ${P('codex-stickman-pipeline').en.built[1]}\n\nCode: ${GITHUB}/codex-stickman-pipeline`,
     es: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').es.tagline} ${P('codex-stickman-pipeline').es.context}\n\n• ${P('codex-stickman-pipeline').es.built[1]}\n\nCódigo: ${GITHUB}/codex-stickman-pipeline` },
+  { id: 'elf', src: 'elf-reader.md', kw: 'elf reader lector libros books ebook epub pdf word audiobook audiolibro voz voces voice voices tts supertonic android kotlin compose npu snapdragon',
+    en: () => `ELF Reader: ${P('elf-reader').en.tagline}\n\n• ${P('elf-reader').en.highlights.join('\n• ')}`,
+    es: () => `ELF Reader: ${P('elf-reader').es.tagline}\n\n• ${P('elf-reader').es.highlights.join('\n• ')}` },
   { id: 'arcane', src: 'arcane-knockout.md', kw: 'arcane knockout unity game juego videojuego wizard magos multiplayer art arte generated generadas',
     en: () => `Arcane Knockout: ${P('arcane-knockout').en.tagline}\n\n${P('arcane-knockout').en.built[0]}`,
     es: () => `Arcane Knockout: ${P('arcane-knockout').es.tagline}\n\n${P('arcane-knockout').es.built[0]}` },
   { id: 'projects', src: 'profile.md', kw: 'projects proyectos portfolio work trabajos hecho built made',
-    en: () => 'Lian\'s featured projects are:\n' + projects.map(p => `• ${p.name}: ${p.en.tagline}`).join('\n') + '\n\nThis chat assistant is also a project: the full version is a FastAPI + LangGraph RAG agent over his project docs.',
-    es: () => 'Los proyectos destacados de Lian son:\n' + projects.map(p => `• ${p.name}: ${p.es.tagline}`).join('\n') + '\n\nEste asistente también es un proyecto: la versión completa es un agente RAG con FastAPI + LangGraph sobre la documentación de sus proyectos.' },
+    en: () => 'Lian\'s featured projects are:\n' + projects.map(p => `• ${p.name}: ${p.en.tagline}`).join('\n') + '\n\nYou can ask me to open any of them, for example “open ELF Reader”.',
+    es: () => 'Los proyectos destacados de Lian son:\n' + projects.map(p => `• ${p.name}: ${p.es.tagline}`).join('\n') + '\n\nPodés pedirme que abra cualquiera, por ejemplo “abrí ELF Reader”.' },
   { id: 'stack', src: 'profile.md', kw: 'stack stacks skill skills tech habilidades technologies tecnologias tecnologías react python fastapi postgresql docker kubernetes languages lenguajes tools herramientas',
-    en: () => 'His main stack: React and JavaScript on the frontend; Python (FastAPI, Pydantic) and PostgreSQL on the backend; LLM APIs, LangGraph, RAG, Whisper and TTS for AI work; Docker and Kubernetes (intermediate); pytest and headless tests; plus Unity/C# and FFmpeg.',
-    es: () => 'Su stack principal: React y JavaScript en el frontend; Python (FastAPI, Pydantic) y PostgreSQL en el backend; APIs de LLM, LangGraph, RAG, Whisper y TTS para IA; Docker y Kubernetes (nivel intermedio); pytest y tests headless; además Unity/C# y FFmpeg.' },
+    en: () => 'His main stack: React and JavaScript on the frontend; Python (FastAPI, Pydantic) and PostgreSQL on the backend; LLM APIs, LangGraph, RAG, Whisper and TTS for AI work; Docker and Kubernetes (intermediate); pytest and headless tests; Kotlin and Jetpack Compose for Android; plus Unity/C# and FFmpeg.',
+    es: () => 'Su stack principal: React y JavaScript en el frontend; Python (FastAPI, Pydantic) y PostgreSQL en el backend; APIs de LLM, LangGraph, RAG, Whisper y TTS para IA; Docker y Kubernetes (nivel intermedio); pytest y tests headless; Kotlin y Jetpack Compose para Android; además Unity/C# y FFmpeg.' },
   { id: 'education', src: 'profile.md', kw: 'education educacion educación study estudios university universidad degree carrera thesis tesis fiuni english ingles inglés',
     en: () => 'Education:\n• ' + education.en.join('\n• ') + '\n\nLanguages: Spanish (native), English (advanced).',
     es: () => 'Formación:\n• ' + education.es.join('\n• ') + '\n\nIdiomas: español (nativo), inglés (avanzado).' },
@@ -41,8 +43,8 @@ const intents = [
     en: () => `You can reach Lian on LinkedIn (${LINKEDIN}) or see his code on GitHub (${GITHUB}).`,
     es: () => `Podés contactar a Lian por LinkedIn (${LINKEDIN}) o ver su código en GitHub (${GITHUB}).` },
   { id: 'assistant', src: 'profile.md', kw: 'assistant asistente chatbot bot rag langgraph how you work funcionás funciona this site sitio',
-    en: () => 'The full assistant is Lian\'s LangGraph project: a FastAPI backend running a LangGraph StateGraph (regex prefilter → tool-calling agent → retriever tool (BM25 + model2vec embeddings) → LLM relevance grading (rewrites the question once if nothing fits) → LLM answer with citations → LLM grounding check with one retry), using NVIDIA Nemotron via OpenRouter and short conversation memory. You are seeing the simpler in-browser fallback (keyword search, no LLM) because the AI server did not respond.',
-    es: () => 'El asistente completo es el proyecto de LangGraph de Lian: un backend FastAPI con un StateGraph de LangGraph (prefiltro con regex → agente que llama a la herramienta de búsqueda (BM25 + embeddings model2vec) → evaluación de relevancia con LLM (reescribe la pregunta una vez si nada sirve) → respuesta del LLM con citas → verificación de respaldo con un reintento), usando NVIDIA Nemotron vía OpenRouter y memoria corta de conversación. Estás viendo la versión simple en el navegador (búsqueda por palabras, sin LLM) porque el servidor de IA no respondió.' },
+    en: () => 'The full assistant is Lian\'s LangGraph project: a FastAPI backend running a LangGraph StateGraph (regex prefilter → tool-calling agent → retriever tool (BM25 + model2vec embeddings) → LLM relevance grading (rewrites the question once if nothing fits) → LLM answer with citations → LLM grounding check with one retry), using a free model via OpenRouter and short conversation memory. It can also operate this page (theme, language, sections, projects, CV) with whitelisted tools. You are seeing the simpler in-browser fallback (keyword search, no LLM) because the AI server did not respond.',
+    es: () => 'El asistente completo es el proyecto de LangGraph de Lian: un backend FastAPI con un StateGraph de LangGraph (prefiltro con regex → agente que llama a la herramienta de búsqueda (BM25 + embeddings model2vec) → evaluación de relevancia con LLM (reescribe la pregunta una vez si nada sirve) → respuesta del LLM con citas → verificación de respaldo con un reintento), usando un modelo gratuito vía OpenRouter y memoria corta de conversación. También puede usar esta página (tema, idioma, secciones, proyectos, CV) con herramientas de una lista permitida. Estás viendo la versión simple en el navegador (búsqueda por palabras, sin LLM) porque el servidor de IA no respondió.' },
 ]
 
 const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -55,11 +57,11 @@ const cIdx = new MiniSearch(opts); cIdx.addAll(kb.map(c => ({ ...c, kw: '' })))
 // Guard before retrieval (mirrors backend/app/guard.py; the backend adds an LLM router on top).
 const CODE_REQUEST = /\b(source code|codigo fuente|repo|repos|repositorio\w*|github|clonar|clone)\b|\b(su|sus|tu|tus|el|del|his|your)\s+(codigo|code)\b(?!\s+(de|para|for|to)\s+(una?|an?)\b)/
 const PRIVATE = /\b(e-?mail|correo|phone|telefono|celular|whatsapp|address|direccion|domicilio|salar\w*|sueldo|password\w*|contrasena\w*|cedula|dni|id card|api key|token)\b/
-const PROFILE = /\b(lian|glossub|stickman|codex|arcane|knockout|portfolio|project\w*|proyecto\w*|stack|skill\w*|habilidad\w*|tecnolog\w*|experien\w*|educa\w*|formacion|estudi\w*|universidad|university|tesis|thesis|work\w*|trabaj\w*|remot\w*|disponib\w*|availab\w*|contact\w*|linkedin|cv|resume|curriculum|ingles|english|idioma\w*|language\w*|serie\w*|subtit\w*|whisper|llm|rag|langgraph|react|python|fastapi|unity|game|juego|assistant|asistente|chatbot|hire|contratar|freelance|role\w*|rol)\b/
+const PROFILE = /\b(lian|elf|reader|lector|glossub|stickman|codex|arcane|knockout|portfolio|project\w*|proyecto\w*|stack|skill\w*|habilidad\w*|tecnolog\w*|experien\w*|educa\w*|formacion|estudi\w*|universidad|university|tesis|thesis|work\w*|trabaj\w*|remot\w*|disponib\w*|availab\w*|contact\w*|linkedin|cv|resume|curriculum|ingles|english|idioma\w*|language\w*|serie\w*|subtit\w*|whisper|llm|rag|langgraph|react|python|fastapi|unity|game|juego|assistant|asistente|chatbot|hire|contratar|freelance|role\w*|rol)\b/
 const DEMO = /\b(demo|reviewer\w*|evaluador\w*|probar|try|test account|cuenta de prueba|login|acceso|access)\b/
 const PORTFOLIO_REPO = `${GITHUB}/portfolio`, STICKMAN_REPO = `${GITHUB}/codex-stickman-pipeline`
 const MSG = {
-  code_request: { en: `GlosSub and Arcane Knockout are private, so their source code can't be shared, but I can explain how they work. Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio, including the assistant backend (${PORTFOLIO_REPO}).`, es: `GlosSub y Arcane Knockout son privados, así que su código no se puede compartir, pero puedo explicarte cómo funcionan. Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio, incluido el backend del asistente (${PORTFOLIO_REPO}).` },
+  code_request: { en: `The code of GlosSub, ELF Reader and Arcane Knockout is not public, but I can explain how they work. Public code: Codex Stickman Pipeline (${STICKMAN_REPO}) and this portfolio, including the assistant backend (${PORTFOLIO_REPO}).`, es: `El código de GlosSub, ELF Reader y Arcane Knockout no es público, pero puedo explicarte cómo funcionan. Código público: Codex Stickman Pipeline (${STICKMAN_REPO}) y este portfolio, incluido el backend del asistente (${PORTFOLIO_REPO}).` },
   private: { en: `I can't share personal data. To contact Lian, use LinkedIn (${LINKEDIN}).`, es: `No puedo compartir datos personales. Para contactar a Lian, usá LinkedIn (${LINKEDIN}).` },
   off_topic: { en: 'Sorry, I can only answer questions about Lian, his experience and his projects.', es: 'Perdón, solo puedo responder sobre Lian, su experiencia y sus proyectos.' },
 }

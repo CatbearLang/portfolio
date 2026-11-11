@@ -15,6 +15,7 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 ## Technical skills
 
 - Frontend: React, JavaScript, Vite, HTML/CSS
+- Mobile: Android with Kotlin and Jetpack Compose (ELF Reader), on-device AI inference
 - Backend & data: Python (FastAPI, Typer, Pydantic), PostgreSQL, REST APIs
 - AI & automation: LLM APIs (OpenAI-compatible), structured JSON outputs, Whisper ASR, TTS, image generation, AI workflows, LangGraph, n8n
 - DevOps & infrastructure (intermediate): Docker, Kubernetes, server deployment and maintenance, CI/data pipelines, load balancing, distributed systems
@@ -24,6 +25,14 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 ## Experience
 
 - Freelance Full-Stack Developer & Open-Source Contributor, remote (2023 – present, 3 years): web applications for small-business clients with React frontends, backend services and PostgreSQL; turning client requirements into working features, from data modeling and API design to delivery and post-launch support; diagnosing and fixing issues in existing codebases and shipping incremental updates; open-source projects published on GitHub (github.com/CatbearLang), including Codex Stickman Pipeline.
+
+## Projects
+
+- This portfolio's AI assistant (LangGraph + RAG, and it can control the page)
+- ELF Reader: Android e-book reader that reads aloud with voices generated on the device
+- GlosSub: bilingual subtitles with color-aligned translation, to learn languages by watching series
+- Codex Stickman Pipeline: one command turns a topic into a narrated explainer video (open source)
+- Arcane Knockout: online multiplayer wizard-duel game in Unity 6 / C#
 - IT Support Technician — Vinader Computación, Encarnación (2017): hardware and software support, installation, configuration, troubleshooting, preventive and corrective maintenance.
 - Cashier — Casa Jorge, Encarnación (5 years): customer service, cash handling and daily register balancing.
 
@@ -48,10 +57,12 @@ The chat assistant on this site is Lian's LangGraph + RAG project. It is a FastA
 - answer: an LLM (NVIDIA Nemotron, free tier via OpenRouter) answers only from the retrieved sources and cites them like [1];
 - check: a second LLM call verifies the answer is supported by the sources; if not, the answer is regenerated once with stricter instructions, otherwise the assistant says it doesn't have that information.
 
+It can also control this website: when a visitor asks to switch to dark mode, change the language, go to a section, open a project or download the CV, the agent calls page tools (set_theme, set_language, go_to_section, open_project, download_cv) instead of searching. The backend validates the requested actions against a whitelist and the browser executes them visibly: a cursor moves to the real control on the page, highlights it and clicks it. That takes one LLM call. If the AI server is asleep or out of its free quota, the same commands are understood by simple intent matching in the browser.
+
 It keeps short conversation memory: the browser sends the last few turns so follow-up questions work. The frontend is React + Vite on GitHub Pages; if the free backend is asleep or unavailable, the page falls back to a simpler in-browser keyword search, clearly labeled as such. Every answer shows an "agent trace" (which nodes ran, which chunks were retrieved with their scores, whether the grounding check passed) and the exact cited snippets.
 
-Safety and cost limits: questions are limited to 300 characters; each visitor gets 8 free questions per day with a short burst limit, plus a global daily cap; the suggested questions are answered from answers precomputed once by the real graph (zero API calls), and repeated questions are served from a cache. Prompt-injection hardening is layered: a regex prefilter declines obvious attempts ("ignore previous instructions", asking for the system prompt or keys), visitor text and documents are wrapped in delimiters that the prompts treat as data only, the model never receives any secret, and the grounding check rejects answers not supported by the sources. This reduces risk but is not "injection-proof". It is a compact demo, not a production multi-agent system: the graph has one retry loop and no external tools.
+Safety and cost limits: questions are limited to 300 characters; each visitor gets 8 free questions per day with a short burst limit, plus a global daily cap; the suggested questions are answered from answers precomputed once by the real graph (zero API calls), and repeated questions are served from a cache. Prompt-injection hardening is layered: a regex prefilter declines obvious attempts ("ignore previous instructions", asking for the system prompt or keys), visitor text and documents are wrapped in delimiters that the prompts treat as data only, the model never receives any secret, and the grounding check rejects answers not supported by the sources. This reduces risk but is not "injection-proof". It is a compact demo, not a production multi-agent system: the graph has one rewrite loop, one answer retry, a read-only search tool and whitelisted page tools.
 
 ## Code availability
 
-Public repositories: Codex Stickman Pipeline (https://github.com/CatbearLang/codex-stickman-pipeline) and this portfolio, including the assistant backend (https://github.com/CatbearLang/portfolio). GlosSub and Arcane Knockout are private projects, so their source code is not shared, but the assistant can explain how they work.
+Public repositories: Codex Stickman Pipeline (https://github.com/CatbearLang/codex-stickman-pipeline) and this portfolio, including the assistant backend (https://github.com/CatbearLang/portfolio). GlosSub and Arcane Knockout are private projects and the source code of ELF Reader is not published, so their code is not shared, but the assistant can explain how they work.

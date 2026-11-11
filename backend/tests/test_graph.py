@@ -51,7 +51,7 @@ def test_knowledge_has_no_private_data():
 def test_api(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "fake")
     monkeypatch.setenv("EMBED_BACKEND", "hash")
-    monkeypatch.setenv("MIN_SCORE", "0.05")
+    monkeypatch.setenv("RETRIEVAL_MIN_SCORE", "0.05")
     import importlib
     import app.main as m
     importlib.reload(m)

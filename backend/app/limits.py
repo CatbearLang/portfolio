@@ -20,10 +20,22 @@ MSG = {
 }
 
 
-def client_ip(headers, peer: str | None) -> str:
-    # Render sits behind a proxy: the first X-Forwarded-For hop is the visitor.
-    xff = headers.get("x-forwarded-for", "")
-    return xff.split(",")[0].strip() or peer or "unknown"
+def client_ip(headers, peer: str | None, trusted_headers: tuple[str, ...] | list[str] = ("cf-connecting-ip",),
+              hops: int = 1) -> tuple[str, str]:
+    """Return (ip, where it came from).
+
+    The leftmost X-Forwarded-For value is written by the visitor and can be faked on every request, which would
+    bypass the per-visitor quota and burn the global one. So: first a header that the hosting edge overwrites
+    (configurable), else the X-Forwarded-For entry appended by the nearest trusted proxy, counted from the right.
+    """
+    for h in trusted_headers:
+        v = (headers.get(h) or "").strip()
+        if v:
+            return v.split(",")[0].strip(), h
+    hops_list = [x.strip() for x in (headers.get("x-forwarded-for") or "").split(",") if x.strip()]
+    if hops_list and hops >= 1:
+        return hops_list[max(0, len(hops_list) - hops)], f"x-forwarded-for[-{hops}]"
+    return peer or "unknown", "peer"
 
 
 class Quotas:
