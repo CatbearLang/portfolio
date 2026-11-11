@@ -18,7 +18,7 @@ const intents = [
   { id: 'stickman', src: 'codex-stickman-pipeline.md', kw: 'stickman codex pipeline video videos explainer explicativo tts ffmpeg cost costo costos budget presupuesto',
     en: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').en.tagline} ${P('codex-stickman-pipeline').en.context}\n\n• ${P('codex-stickman-pipeline').en.built[1]}\n\nCode: ${GITHUB}/codex-stickman-pipeline`,
     es: () => `Codex Stickman Pipeline: ${P('codex-stickman-pipeline').es.tagline} ${P('codex-stickman-pipeline').es.context}\n\n• ${P('codex-stickman-pipeline').es.built[1]}\n\nCódigo: ${GITHUB}/codex-stickman-pipeline` },
-  { id: 'elf', src: 'elf-reader.md', kw: 'elf reader lector libros books ebook epub pdf word audiobook audiolibro voz voces voice voices tts supertonic android kotlin compose npu snapdragon',
+  { id: 'elf', src: 'elf-reader.md', kw: 'elf reader lector libros books ebook epub pdf word audiobook audiolibro voz voces voice voices tts supertonic android kotlin compose npu',
     en: () => `ELF Reader: ${P('elf-reader').en.tagline}\n\n• ${P('elf-reader').en.highlights.join('\n• ')}`,
     es: () => `ELF Reader: ${P('elf-reader').es.tagline}\n\n• ${P('elf-reader').es.highlights.join('\n• ')}` },
   { id: 'arcane', src: 'arcane-knockout.md', kw: 'arcane knockout unity game juego videojuego wizard magos multiplayer art arte generated generadas',

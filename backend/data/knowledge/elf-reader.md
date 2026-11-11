@@ -6,7 +6,7 @@
 
 - Opens EPUB, Markdown, Word documents, plain text (TXT), PDFs with selectable text, and HTML.
 - Reads the book aloud and keeps reading in the background, so the visitor can listen like an audiobook.
-- Generates the voice on the device with Supertonic, an on-device text-to-speech model; on phones with a Snapdragon 8 Elite chip, generation can use the NPU (the phone's AI accelerator).
+- Generates the voice on the device with Supertonic, an on-device text-to-speech model, optimized to run on the phone's NPU (its AI accelerator) instead of the CPU, for faster and more efficient generation.
 - Reading extras: animated backgrounds, ambient sounds, a gallery for the book's illustrations, and a sleep timer.
 
 ## Why on-device voices
@@ -15,7 +15,7 @@ Speech is synthesized on the phone, so reading aloud does not depend on a server
 
 ## Tech stack
 
-Kotlin · Jetpack Compose · Android · Supertonic (on-device TTS) · Snapdragon NPU acceleration
+Kotlin · Jetpack Compose · Android · Supertonic (on-device TTS) · NPU acceleration
 
 ## Availability
 
