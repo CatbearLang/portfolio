@@ -135,3 +135,11 @@ body{transition:background-color .25s,color .25s}
   .cards.minor{grid-template-columns:1fr}.cards.minor .thumb{width:92px}
 }
 .evaluation .eval-meta{color:var(--muted);max-width:68ch;margin:0 0 16px}.table-wrap{overflow-x:auto;margin:0 0 16px}.eval-table{border-collapse:collapse;width:100%;font-size:.92rem}.eval-table caption{text-align:left;color:var(--faint);font-size:.85rem;padding-bottom:8px}.eval-table th,.eval-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}.eval-table thead th{color:var(--muted);font-weight:500}.eval-table tbody th{font-weight:500}.evaluation ul{max-width:68ch}
+
+/* App icon next to a project's name, and a phone-shaped hero for portrait screen recordings */
+.app-icon{display:inline-block;vertical-align:middle;border-radius:22%;margin-right:10px;position:relative;top:-2px;border:1px solid var(--line)}
+.hero-img.hero-phone{display:block;width:auto;max-width:100%;height:min(640px,80vh);max-height:none;aspect-ratio:720/1530;object-fit:contain;margin:28px auto 8px;border-radius:24px}
+.gallery.shots img{aspect-ratio:9/19.5;object-fit:cover;object-position:top;background:#000}
+.gallery.scenes{grid-template-columns:repeat(4,1fr)}
+.gallery.scenes img{aspect-ratio:3/2;object-fit:cover}
+@media(max-width:760px){.gallery.scenes{grid-template-columns:1fr 1fr}}

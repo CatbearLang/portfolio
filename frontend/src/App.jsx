@@ -71,7 +71,7 @@ export default function App() {
 
 function Thumb({ p, lang }) {
   const [failed, setFailed] = useState(false)
-  if (p.image && !failed) return <img src={p.image} alt={p.imageAlt?.[lang] || ''} loading="lazy" onError={() => setFailed(true)} />
+  if (p.image && !failed) return <img src={p.image} alt={p.imageAlt?.[lang] || ''} loading="lazy" style={p.imagePosition ? { objectPosition: p.imagePosition } : undefined} onError={() => setFailed(true)} />
   return <Cover kind={p.cover} title={p.name} />
 }
 
@@ -97,7 +97,7 @@ function ProjectCard({ p, lang, t, minor }) {
     <a className={minor ? 'card minor' : 'card'} href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }} data-ui={`project-${p.slug}`}>
       <div className="thumb"><Thumb p={p} lang={lang} /></div>
       <div className="card-body">
-        <h3>{p.name}</h3><p>{p[lang].tagline}</p>{!minor && <p className="metric">{p[lang].metric}</p>}
+        <h3>{p.icon && <img className="app-icon" src={p.icon} alt="" width="28" height="28" />}{p.name}</h3><p>{p[lang].tagline}</p>{!minor && <p className="metric">{p[lang].metric}</p>}
         <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
         <span className="more">{t.readMore}</span>
       </div>
@@ -158,19 +158,19 @@ function Home({ lang, t, cv, onAsk }) {
 // Hero media: video, else image, else the drawn cover. Missing files are skipped silently.
 function HeroMedia({ p, lang }) {
   const [stage, setStage] = useState(p.video ? 'video' : p.image ? 'image' : 'cover')
-  if (stage === 'video') return <video className="hero-img" src={p.video} poster={p.image} muted loop autoPlay={!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches} playsInline controls preload="metadata" onError={() => setStage(p.image ? 'image' : 'cover')} />
+  if (stage === 'video') return <video className={p.videoShape === 'phone' ? 'hero-img hero-phone' : 'hero-img'} src={p.video} poster={p.poster || p.image} aria-label={p.videoAlt?.[lang]} muted loop autoPlay={!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches} playsInline controls preload="metadata" onError={() => setStage(p.image ? 'image' : 'cover')} />
   if (stage === 'image') return <img className="hero-img" src={p.image} alt={p.imageAlt?.[lang] || p.name} onError={() => setStage('cover')} />
   return p.cover && !p.diagram ? <div className="hero-img hero-cover"><Cover kind={p.cover} title={p.name} /></div> : null
 }
 
 // Screenshots / audio that only appear once the file actually loads (so missing media leaves no gap).
-function Gallery({ items, lang, title }) {
+function Gallery({ items, lang, title, variant }) {
   const [ok, setOk] = useState({})
   const any = Object.values(ok).some(Boolean)
   return (
     <div className={any ? 'media-block' : 'media-block pending'}>
       {any && <h2>{title}</h2>}
-      <div className="gallery">{items.map(([src, alt]) => (
+      <div className={variant ? `gallery ${variant}` : 'gallery'}>{items.map(([src, alt]) => (
         <figure key={src} hidden={!ok[src]}>
           <img src={src} alt={alt[lang]} onLoad={() => setOk(o => ({ ...o, [src]: true }))} onError={() => setOk(o => ({ ...o, [src]: false }))} />
           <figcaption>{alt[lang]}</figcaption>
@@ -200,7 +200,7 @@ function ProjectPage({ p, lang, t, onChat }) {
   return (
     <article className="project" style={{ '--accent': p.accent }}>
       <a href="#/" className="back">{t.back}</a>
-      <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
+      <h1>{p.icon && <img className="app-icon" src={p.icon} alt="" width="44" height="44" />}{p.name}</h1><p className="lead">{c.tagline}</p>
       <dl className="facts"><div><dt>{t.context}</dt><dd>{c.context}</dd></div><div><dt>{t.stackL}</dt><dd>{p.tags.join(' · ')}</dd></div></dl>
       {(p.chatCta || p.links.length > 0) && <div className="cta">{p.chatCta && <button className="btn" onClick={onChat}>{t.tryIt}</button>}{p.links.map(([n, u], i) => <a key={u} className={`btn${p.chatCta || i ? ' ghost' : ''}`} href={u} target="_blank" rel="noreferrer">{linkName(n, lang)}</a>)}</div>}
       <HeroMedia key={p.slug} p={p} lang={lang} />
@@ -208,7 +208,8 @@ function ProjectPage({ p, lang, t, onChat }) {
       <h2>{t.problem}</h2><p className="problem">{c.problem}</p>
       <h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol>
       {p.diagram && <><h2>{t.architecture}</h2><Diagram lang={lang} /></>}
-      {p.gallery && <Gallery key={`g-${p.slug}`} items={p.gallery} lang={lang} title={t.screenshots} />}
+      {p.gallery && <Gallery key={`g-${p.slug}`} items={p.gallery} lang={lang} title={t.screenshots} variant="shots" />}
+      {p.scenes && <Gallery key={`s-${p.slug}`} items={p.scenes} lang={lang} title={t.scenes} variant="scenes" />}
       <h2>{t.decisions}</h2><ul>{c.decisions.map(h => <li key={h}>{h}</li>)}</ul>
       <div className="grid2">
         <div><h2>{t.results}</h2><ul className="checks">{c.results.map(h => <li key={h}>{h}</li>)}</ul></div>
