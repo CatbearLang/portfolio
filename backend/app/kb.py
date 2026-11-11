@@ -82,6 +82,9 @@ def chunk_markdown(path: Path, max_chars: int = 1200) -> list[Chunk]:
     return chunks
 
 
+# BM25 score that maps to 0.5 after squashing: one strong term match scores ~6-8, an incidental word ~1-2.
+BM25_K = 4.0
+
 _STOP = set("what which who how does did the and for are his her him its this that with from about tell can you your que cual como del las los una por para con sus hace tiene sobre esta este son ser fue lian yang".split())
 # Small bilingual expansion so Spanish / generic questions hit the right English docs.
 _EXPAND = {
@@ -135,7 +138,11 @@ class KnowledgeBase:
         return out
 
     def search(self, query: str, k: int = 4) -> list[tuple[Chunk, float]]:
-        """Hybrid: 0.4 * cosine (vector) + 0.6 * BM25 normalized to the best match."""
+        """Hybrid: 0.4 * cosine (vector) + 0.6 * BM25 squashed to 0..1 with a fixed scale (bm / (bm + BM25_K)).
+
+        A fixed scale keeps scores comparable across queries, so a minimum score can actually filter: a query that
+        shares one incidental word with a document gets a low score instead of being stretched to 1 (the old
+        "divide by the best match" normalization made every query's top hit look perfect)."""
         q = self.embedder.embed([query])
         faiss.normalize_L2(q)
         scores, idx = self.index.search(q, len(self.chunks))
@@ -144,7 +151,7 @@ class KnowledgeBase:
             if i >= 0:
                 vec[i] = s_
         bm = self._bm25(query)
-        bm = bm / bm.max() if bm.max() > 0 else bm
+        bm = bm / (bm + BM25_K)
         total = 0.4 * vec + 0.6 * bm
         order = np.argsort(-total)[:k]
         return [(self.chunks[i], float(total[i])) for i in order]

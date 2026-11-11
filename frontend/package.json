@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "prebuild": "node scripts/build-kb.mjs",
-    "predev": "node scripts/build-kb.mjs"
+    "predev": "node scripts/build-kb.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.3.0",

@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import logging
 import os
+from contextlib import asynccontextmanager
 from functools import lru_cache
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +24,19 @@ MAX_TURN_CHARS = 500  # each history turn truncated
 settings = Settings()
 log = logging.getLogger("portfolio")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-app = FastAPI(title="Lian Yang portfolio assistant")
+
+
+@asynccontextmanager
+async def lifespan(_app):
+    # Load the embedding model + index at boot, not on the first visitor request.
+    try:
+        get_graph()
+    except Exception:
+        log.exception("graph warm-up failed")
+    yield
+
+
+app = FastAPI(title="Lian Yang portfolio assistant", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 quotas = Quotas(per_ip_day=int(os.getenv("IP_DAILY", "8")), burst=int(os.getenv("IP_BURST", "3")),
                 global_day=int(os.getenv("GLOBAL_DAILY", "40")))
@@ -54,9 +68,15 @@ class Step(BaseModel):
     hits: list[dict] = []
 
 
+class Action(BaseModel):
+    type: Literal["set_theme", "set_language", "go_to_section", "open_project", "download_cv"]
+    value: str
+
+
 class ChatOut(BaseModel):
     answer: str
     sources: list[Source]
+    actions: list[Action] = []  # whitelisted page actions; the browser executes them
     trace: list[Step] = []
     cached: str | None = None   # "suggested" | "lru" | None
     limited: str | None = None  # quota reason, if refused
@@ -72,12 +92,12 @@ def get_graph():
     log.info("embedder ready: %s", STATE["embedder"])
     kb = KnowledgeBase.from_dir(settings.knowledge_dir, emb)
     llm = make_llm(settings.llm_provider, settings.llm_base_url, settings.llm_api_key, settings.llm_model)
-    return build_graph(kb, llm, settings.top_k, settings.min_score)
+    return build_graph(kb, llm, settings.top_k, settings.min_score, settings.skip_grade_score)
 
 
 def run_graph(question: str, lang: str, history: list[dict]) -> dict:
     out = get_graph().invoke({"question": question, "lang": lang, "history": history})
-    return {"answer": out["answer"], "trace": out.get("trace", []),
+    return {"answer": out["answer"], "trace": out.get("trace", []), "actions": out.get("actions", []),
             "sources": [{"id": s["id"], "source": s["source"], "title": s["title"], "snippet": s["text"][:400], "score": s.get("score", 0)}
                         for s in out.get("sources", [])]}
 
@@ -87,18 +107,9 @@ def notice(kind: str, lang: str, node: str, **fmt) -> ChatOut:
                    trace=[Step(node=node, detail=kind)])
 
 
-@app.on_event("startup")
-def warm_up():
-    # Load the embedding model + index at boot, not on the first visitor request.
-    try:
-        get_graph()
-    except Exception:
-        log.exception("graph warm-up failed")
-
-
 @app.get("/api/health")
 def health():
-    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>generate_query_or_respond>tools>grade_documents(>rewrite_question)>answer>check", "embeddings": STATE.get("embedder", "not loaded"),
+    return {"ok": True, "provider": settings.llm_provider, "graph": "prefilter>generate_query_or_respond>(tools>grade_documents(>rewrite_question)>answer>check | ui_action)", "embeddings": STATE.get("embedder", "not loaded"),
             "memory": True, "max_question": MAX_Q, "suggested": len(cache.suggested)}
 
 
@@ -112,7 +123,12 @@ def chat(body: ChatIn, request: Request):
     hit = None if history else cache.get(key)  # follow-ups depend on context: never cached
     if hit:
         return ChatOut(**hit[0], cached=hit[1])
-    refused = quotas.check(client_ip(request.headers, request.client.host if request.client else None))
+    ip, via = client_ip(request.headers, request.client.host if request.client else None,
+                        settings.client_ip_headers, settings.trusted_proxy_hops)
+    if via not in STATE.setdefault("ip_sources", set()):  # log which header is used (never the IP itself)
+        STATE["ip_sources"].add(via)
+        log.info("client ip taken from: %s", via)
+    refused = quotas.check(ip)
     if refused:
         return notice(refused, lang, "rate_limit", n=quotas.per_ip_day)
     try:

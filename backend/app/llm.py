@@ -60,6 +60,17 @@ class FakeLLM:
             q = str(messages[-1].content).lower()
             if any(w in q for w in self.OFF):
                 return AIMessage("Sorry, I can only answer questions about Lian and his projects.")
+            names = {t.name for t in tools}
+            ui = []
+            if "set_theme" in names and any(w in q for w in ("dark mode", "modo oscuro", "light mode", "modo claro")):
+                ui.append(("set_theme", {"theme": "dark" if ("dark" in q or "oscuro" in q) else "light"}))
+            if "open_project" in names and any(w in q for w in ("open ", "show me", "abrí", "abri ", "mostrame", "quiero ver")):
+                for alias, slug in (("glossub", "glossub"), ("elf", "elf-reader"), ("arcane", "arcane-knockout"),
+                                    ("stickman", "codex-stickman-pipeline"), ("bogus", "../../etc")):
+                    if alias in q:
+                        ui.append(("open_project", {"project": slug}))
+            if ui:
+                return AIMessage("", tool_calls=[{"name": n, "args": a, "id": f"call_{i}", "type": "tool_call"} for i, (n, a) in enumerate(ui)])
             if "rewritten query:" in q:
                 query = q.split("rewritten query:")[-1].strip()[:200]
             else:

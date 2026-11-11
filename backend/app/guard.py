@@ -49,8 +49,8 @@ MSG = {
         "es": f"No puedo compartir datos personales. Para contactar a Lian, usá LinkedIn ({LINKEDIN}).",
     },
     "off_topic": {
-        "en": "Sorry, I can only answer questions about Lian, his experience and his projects (GlosSub, Codex Stickman Pipeline, Arcane Knockout, this portfolio).",
-        "es": "Perdón, solo puedo responder sobre Lian, su experiencia y sus proyectos (GlosSub, Codex Stickman Pipeline, Arcane Knockout, este portfolio).",
+        "en": "Sorry, I can only answer questions about Lian, his experience and his projects (this portfolio's assistant, ELF Reader, GlosSub, Codex Stickman Pipeline, Arcane Knockout).",
+        "es": "Perdón, solo puedo responder sobre Lian, su experiencia y sus proyectos (el asistente de este portfolio, ELF Reader, GlosSub, Codex Stickman Pipeline, Arcane Knockout).",
     },
 }
 
