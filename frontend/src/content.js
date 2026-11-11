@@ -10,8 +10,9 @@ export const ui = {
     role: 'Python & AI Integration Developer',
     roleSub: 'FastAPI · React · LLMs',
     hero: 'I build LLM applications end to end: RAG assistants that answer with sources, multi-stage AI pipelines and full-stack web apps, with offline tests and cost controls. Remote from Paraguay (UTC−3, full US Eastern overlap).',
-    tryLine: 'Try the assistant in the corner: ask it about my work, or tell it “switch to dark mode” or “open ELF Reader” and watch it use the page.',
-    ctaProjects: 'See projects', ctaChat: 'Try the assistant',
+    ctaProjects: 'See projects', ctaContact: 'Contact me',
+    ask: { title: 'Ask my AI assistant', sub: 'It answers from my project docs with sources, and can use this page for you.', placeholder: 'Ask about my work…', send: 'Ask', prompts: [['Show me the ELF Reader project', true], ['What LangGraph project did he build and how does it work?', false], ['What is his tech stack?', false]] },
+    otherProjects: 'Other projects',
     aboutTitle: 'About',
     about: 'Informatics Engineering candidate (thesis stage) from Encarnación, Paraguay, with 3 years of freelance full-stack work in React, Python and PostgreSQL. I design AI workflows (LLMs, speech recognition, TTS, image generation, on-device inference), automate processes with n8n and ship containerized services with Docker. Open to remote backend, full-stack and AI integration roles.',
     skillsTitle: 'Skills', projectsTitle: 'Featured projects', expTitle: 'Experience', eduTitle: 'Education',
@@ -27,8 +28,9 @@ export const ui = {
     role: 'Desarrollador Python e Integración de IA',
     roleSub: 'FastAPI · React · LLMs',
     hero: 'Construyo aplicaciones con LLMs de punta a punta: asistentes RAG que responden con fuentes, pipelines de IA de varias etapas y apps web full-stack, con tests sin conexión y control de costos. Remoto desde Paraguay (UTC−3, horario completo de EE. UU. Este).',
-    tryLine: 'Probá el asistente de la esquina: preguntale por mi trabajo, o decile “modo oscuro” o “abrí ELF Reader” y mirá cómo usa la página.',
-    ctaProjects: 'Ver proyectos', ctaChat: 'Probar el asistente',
+    ctaProjects: 'Ver proyectos', ctaContact: 'Contactame',
+    ask: { title: 'Preguntale a mi asistente de IA', sub: 'Responde con la documentación de mis proyectos, citando fuentes, y puede usar esta página por vos.', placeholder: 'Preguntá sobre mi trabajo…', send: 'Preguntar', prompts: [['Quiero ver el proyecto ELF Reader', true], ['¿Qué proyecto de LangGraph hizo y cómo funciona?', false], ['¿Cuál es su stack?', false]] },
+    otherProjects: 'Otros proyectos',
     aboutTitle: 'Sobre mí',
     about: 'Estudiante de Ingeniería en Informática en etapa de tesis, de Encarnación, Paraguay, con 3 años de trabajo freelance full-stack con React, Python y PostgreSQL. Diseño flujos con IA (LLMs, reconocimiento de voz, TTS, generación de imágenes, inferencia en el dispositivo), automatizo procesos con n8n y despliego servicios en contenedores con Docker. Abierto a roles remotos de backend, full-stack e integración de IA.',
     skillsTitle: 'Habilidades', projectsTitle: 'Proyectos destacados', expTitle: 'Experiencia', eduTitle: 'Formación',
@@ -126,7 +128,7 @@ export const projects = [
     },
   },
   {
-    slug: 'codex-stickman-pipeline', name: 'Codex Stickman Pipeline', accent: '#7c5cff',
+    slug: 'codex-stickman-pipeline', minor: true, name: 'Codex Stickman Pipeline', accent: '#7c5cff',
     image: 'img/stickman-demo.gif',
     tags: ['Python', 'LLM', 'TTS', 'FFmpeg', 'pytest'],
     links: [['GitHub', 'https://github.com/CatbearLang/codex-stickman-pipeline']],
@@ -146,7 +148,7 @@ export const projects = [
     },
   },
   {
-    slug: 'arcane-knockout', name: 'Arcane Knockout', accent: '#f97316',
+    slug: 'arcane-knockout', minor: true, name: 'Arcane Knockout', accent: '#f97316',
     image: 'img/arcane-knockout-unity-poster.jpg',
     video: 'img/arcane-knockout-unity.mp4',
     tags: ['Unity 6', 'C#', 'Unity Netcode', 'Multiplayer'],
@@ -181,6 +183,6 @@ export const experience = {
   ],
 }
 export const education = {
-  en: ['B.Sc. Informatics Engineering — Faculty of Engineering, Universidad Nacional de Itapúa (FIUNI) — Thesis stage (in progress)', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English Intermediate 3A — EUROSUR (2015)'],
-  es: ['Ingeniería en Informática — Facultad de Ingeniería, Universidad Nacional de Itapúa (FIUNI) — en etapa de tesis', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés Intermedio 3A — EUROSUR (2015)'],
+  en: ['B.Sc. Informatics Engineering — Faculty of Engineering, Universidad Nacional de Itapúa (FIUNI) — Thesis stage (in progress)', 'Technical High School Diploma in Informatics (2015–2017), Distinguished Student 2016 & 2017', 'English C1'],
+  es: ['Ingeniería en Informática — Facultad de Ingeniería, Universidad Nacional de Itapúa (FIUNI) — en etapa de tesis', 'Bachiller Técnico en Informática (2015–2017), Alumno Distinguido 2016 y 2017', 'Inglés C1'],
 }

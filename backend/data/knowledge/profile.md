@@ -40,7 +40,7 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 
 - B.Sc. Informatics Engineering — Faculty of Engineering, Universidad Nacional de Itapúa (FIUNI) — Thesis stage (in progress)
 - Technical High School Diploma in Informatics — Colegio Experimental de la Universidad Católica, Encarnación (2015–2017), Distinguished Student honors 2016 and 2017
-- English Intermediate 3A — EUROSUR Training Center (100 hours), 2015
+- English: C1
 
 ## Languages
 

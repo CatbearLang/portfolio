@@ -32,7 +32,7 @@ function Rich({ text }) {
 
 const narrow = () => window.matchMedia?.('(max-width: 760px)').matches
 
-export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
+export default function ChatWidget({ lang, t: tAll, open, setOpen, seed }) {
   const t = tAll.chat
   const [status, setStatus] = useState(API ? 'checking' : 'local') // checking | online | local
   const [msgs, setMsgs] = useState([])
@@ -107,6 +107,9 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
       setMsgs(m => [...m, { role: 'bot', text: d.answer, sources: d.sources, trace: d.trace, cached: d.cached, limited: d.limited }])
     } finally { setBusy(false) }
   }
+
+  // A question sent from the box at the top of the page opens the chat and is asked here.
+  useEffect(() => { if (seed?.q) ask(seed.q) }, [seed?.n])
 
   const unused = list => list.filter(s => !msgs.some(m => m.role === 'user' && m.text === s))
   // After the first message, suggestions shrink to one row above the input, outside the conversation.
