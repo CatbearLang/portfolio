@@ -3,7 +3,7 @@ import re
 
 from app.config import BASE
 from app.kb import HashEmbedder, KnowledgeBase
-from scripts.eval import MODES, grade, load, retrieval
+from scripts.eval import MODES, grade, load, models_md, retrieval, summarize
 
 QS = load()
 DOCS = {p.stem for p in (BASE / "data" / "knowledge").glob("*.md")}
@@ -54,3 +54,17 @@ def test_grade_declines_and_actions():
     assert grade(item("action-dark-es"), ok) == (True, None)
     assert grade(item("action-dark-es"), {"answer": "", "actions": []})[1] == "no page action"
     assert grade(item("action-dark-es"), {"error": "RateLimitError"})[0] is False
+
+
+def test_summary_counts_unrun_questions_as_wrong():
+    qs = [{"id": "a", "expect": "fact"}, {"id": "b", "expect": "refuse"}, {"id": "c", "expect": "action:set_theme=dark"}]
+    run = {"model": "m", "calls": 5, "rows": [
+        {"id": "a", "ok": True, "reason": "ok", "latency": 2.0, "errors": [], "tool_call_failed": False, "path": []},
+        {"id": "b", "ok": False, "reason": "answered instead of declining", "latency": 3.0, "errors": [],
+         "tool_call_failed": False, "path": ["answer: x"]},
+        {"id": "c", "ok": False, "reason": "not run (call budget reached)", "calls": 0, "latency": None},
+    ]}
+    s = summarize(run, qs)
+    assert s["overall"] == (1, 3) and s["actions"] == (0, 1) and s["ran"] == 2
+    md = models_md([run], qs)
+    assert "| m | 1/3 |" in md and "nan" not in md and "m: b: answer: x" in md

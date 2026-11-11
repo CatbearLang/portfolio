@@ -236,37 +236,42 @@ def run_model(model: str, kb, settings: Settings, qs: list[dict], cap: int, gap:
         ok, reason = grade(item, out)
         rows.append({"id": item["id"], "expect": item["expect"], "ok": ok, "reason": reason,
                      "calls": llm.calls - before_calls, "latency": round(time.perf_counter() - t0, 2),
-                     "errors": errs, "tool_call_failed": tool_fail, "answer": (out.get("answer") or "")[:300]})
+                     "errors": errs, "tool_call_failed": tool_fail, "answer": (out.get("answer") or "")[:300],
+                     "path": [f"{t.get('node')}: {t.get('detail')}"[:160] for t in out.get("trace", [])][-4:]})
     return {"model": model, "calls": llm.calls, "rows": rows}
 
 
 def summarize(run: dict, qs: list[dict]) -> dict:
+    """Scores count every question in the subset: a question that was not run (call budget reached) counts as wrong,
+    so a model that burns its budget early can't look better by answering fewer questions."""
     by = {q["id"]: q for q in qs}
-    rows = [r for r in run["rows"] if r["latency"] is not None]
     kind = lambda r: "action" if by[r["id"]]["expect"].startswith("action") else by[r["id"]]["expect"]
-    rate = lambda rs: sum(r["ok"] for r in rs) / len(rs) if rs else float("nan")
-    lat = sorted(r["latency"] for r in rows) or [float("nan")]
+    ran = [r for r in run["rows"] if r["latency"] is not None]
+    count = lambda rs: (sum(r["ok"] for r in rs), len(rs))
+    lat = sorted(r["latency"] for r in ran) or [float("nan")]
     return {
-        "model": run["model"], "ran": len(rows), "of": len(run["rows"]), "requests": run["calls"],
-        "overall": rate(rows),
-        "facts": rate([r for r in rows if kind(r) == "fact"]),
-        "declines": rate([r for r in rows if kind(r) in ("refuse", "unsupported")]),
-        "actions": rate([r for r in rows if kind(r) == "action"]),
+        "model": run["model"], "ran": len(ran), "of": len(run["rows"]), "requests": run["calls"],
+        "overall": count(run["rows"]),
+        "facts": count([r for r in run["rows"] if kind(r) == "fact"]),
+        "declines": count([r for r in run["rows"] if kind(r) in ("refuse", "unsupported")]),
+        "actions": count([r for r in run["rows"] if kind(r) == "action"]),
         "p50": statistics.median(lat), "p95": lat[min(len(lat) - 1, round(0.95 * (len(lat) - 1)))],
-        "failures": sum(1 for r in rows if r["errors"] or r["tool_call_failed"]) / len(rows) if rows else float("nan"),
+        "with_errors": (sum(1 for r in ran if r["errors"] or r["tool_call_failed"]), len(ran)),
     }
 
 
 def models_md(runs: list[dict], qs: list[dict]) -> str:
+    frac = lambda c: f"{c[0]}/{c[1]}"
     lines = [f"# Model evaluation ({date.today().isoformat()})", "",
              f"{len(qs)} questions per model through the live graph (same retrieval, prompts and limits as the site). "
-             "Deterministic grading: key facts and citations by regex, declines and page actions from the graph output.", "",
-             "| model | correct | facts | declines | page actions | p50 / p95 latency | requests | runs with errors |",
-             "|---|---|---|---|---|---|---|---|"]
+             "Deterministic grading: key facts and citations by regex, declines and page actions from the graph output. "
+             "Questions not run because the call budget ran out count as wrong.", "",
+             "| model | correct | facts | declines | page actions | p50 / p95 latency | requests | ran | runs with errors |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for run in runs:
         s = summarize(run, qs)
-        lines.append(f"| {s['model']} | {s['overall']:.0%} ({s['ran']}/{s['of']} ran) | {s['facts']:.0%} | {s['declines']:.0%} | "
-                     f"{s['actions']:.0%} | {s['p50']:.1f}s / {s['p95']:.1f}s | {s['requests']} | {s['failures']:.0%} |")
+        lines.append(f"| {s['model']} | {frac(s['overall'])} | {frac(s['facts'])} | {frac(s['declines'])} | {frac(s['actions'])} | "
+                     f"{s['p50']:.1f}s / {s['p95']:.1f}s | {s['requests']} | {s['ran']}/{s['of']} | {frac(s['with_errors'])} |")
     lines += ["", "## Failures by cause", ""]
     causes: dict[str, list[str]] = {}
     for run in runs:
@@ -277,6 +282,11 @@ def models_md(runs: list[dict], qs: list[dict]) -> str:
                 causes.setdefault("tool call failed, fell back to the text router", []).append(f"{run['model']}: {r['id']}")
     for reason, items in sorted(causes.items(), key=lambda kv: -len(kv[1])):
         lines.append(f"- {reason} ({len(items)}): " + "; ".join(items))
+    lines += ["", "## Where failed questions stopped (last graph steps)", ""]
+    for run in runs:
+        for r in run["rows"]:
+            if not r["ok"] and r.get("path") and not r["errors"]:
+                lines.append(f"- {run['model']}: {r['id']}: " + " | ".join(r["path"]))
     return "\n".join(lines) + "\n"
 
 

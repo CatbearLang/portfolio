@@ -10,16 +10,16 @@
 {"id": "elf-what", "q": "What is ELF Reader?", "lang": "en", "expect": "fact", "sources": ["elf-reader"], "facts": ["android", "aloud|voice\\w*|speech|tts"]}
 {"id": "elf-formats", "q": "Which file formats can ELF Reader open?", "lang": "en", "expect": "fact", "sources": ["elf-reader"], "facts": ["epub", "pdf\\w*", "markdown|txt|word|html"], "model_eval": true}
 {"id": "elf-voices", "q": "¿Cómo genera las voces ELF Reader?", "lang": "es", "expect": "fact", "sources": ["elf-reader"], "facts": ["dispositivo|telefono|celular|on.device", "supertonic|npu"]}
-{"id": "profile-stack", "q": "What is his tech stack?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["python", "react", "fastapi|postgresql"], "model_eval": true}
+{"id": "profile-stack", "q": "What is Lian's tech stack?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["python", "react", "fastapi|postgresql"], "model_eval": true}
 {"id": "profile-study", "q": "¿Qué estudió Lian?", "lang": "es", "expect": "fact", "sources": ["profile"], "facts": ["ingenieria|informatica|informatics", "fiuni|itapua"]}
 {"id": "profile-remote", "q": "Is Lian available for remote work?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["remote\\w*", "utc|eastern|canada|time zones?"]}
-{"id": "profile-years", "q": "How many years of experience does he have?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["3|three"], "model_eval": true}
+{"id": "profile-years", "q": "How many years of experience does Lian have?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["3|three"], "model_eval": true}
 {"id": "profile-contact", "q": "How can I contact Lian?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["linkedin"]}
-{"id": "assistant-langgraph", "q": "What LangGraph project did he build and how does it work?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["assistant|chat\\w*|portfolio", "retriev\\w*|search\\w*|rag"]}
+{"id": "assistant-langgraph", "q": "What LangGraph project did Lian build and how does it work?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["assistant|chat\\w*|portfolio", "retriev\\w*|search\\w*|rag"]}
 {"id": "assistant-grounding", "q": "How does the assistant check that answers are grounded?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["second|check\\w*|verif\\w*", "sources?"], "model_eval": true}
 {"id": "profile-repos", "q": "Which public repositories does Lian have?", "lang": "en", "expect": "fact", "sources": ["profile"], "facts": ["stickman", "portfolio"]}
 {"id": "unsupported-rust", "q": "Does Lian have experience with Rust?", "lang": "en", "expect": "unsupported", "forbid": ["years of rust", "rust developer"], "model_eval": true}
-{"id": "unsupported-google", "q": "Did Lian work at Google?", "lang": "en", "expect": "unsupported", "forbid": ["worked at google", "he worked for google"], "model_eval": true}
+{"id": "unsupported-google", "q": "Did Lian work at Google?", "lang": "en", "expect": "unsupported", "forbid": ["worked at google", "worked for google"], "model_eval": true}
 {"id": "unsupported-users", "q": "How many users does GlosSub have?", "lang": "en", "expect": "unsupported"}
 {"id": "refuse-weather", "q": "What is the weather in Paris tomorrow?", "lang": "en", "expect": "refuse", "forbid": ["degrees|°|sunny|rain"], "model_eval": true}
 {"id": "refuse-calculator", "q": "Write me a Python calculator", "lang": "en", "expect": "refuse", "forbid": ["def |import |print\\("], "model_eval": true}

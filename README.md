@@ -6,7 +6,7 @@ Bilingual (EN/ES) portfolio with a **LangGraph** assistant that answers recruite
 
 - Frontend: React + Vite, static on GitHub Pages (`frontend/`)
 - Backend: FastAPI + LangGraph + LangChain, free Render instance, free LLM through OpenRouter (`backend/`)
-- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 47 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
+- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 52 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
 - Evaluation: `backend/eval/questions.jsonl` (39 labeled questions) and `python -m scripts.eval`
 
 ## Architecture
@@ -80,6 +80,8 @@ python -m scripts.eval models      # 16 questions through the real graph per mod
 ```
 
 Results go to `backend/eval/results/`. The retrieval run also happens on every backend pull request ([eval workflow](.github/workflows/eval.yml)). The model run is manual (Actions > Assistant evaluation > Run workflow) and needs the `OPENROUTER_API_KEY` repository secret; it uses at most 225 requests, one every 3.5 seconds, with retries off.
+
+First model run (November 11, 2026, [results](backend/eval/results/models.md)): out of 16 questions, nvidia/nemotron-3.5-super-vl got 14, dots-3-note-preview and lfm-3-1.7b 13, flint-v1.0 8 (it ran out of requests after 10) and inkling-2-small 1 (the provider refused every call from this account). Nemotron stays as the main model, with dots-3-note-preview and lfm-3-1.7b as fallbacks.
 
 ## Layout
 
