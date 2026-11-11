@@ -39,7 +39,8 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState('')
-  const end = useRef(null)
+  const body = useRef(null)
+  const last = useRef(null)
   const tRef = useRef(tAll)
   tRef.current = tAll
 
@@ -51,7 +52,17 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
   }
   useEffect(ping, [])
   useEffect(() => { if (open && status === 'local' && API) ping() }, [open])
-  useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, busy])
+  // While waiting, keep the question and the typing line in view. When an answer arrives, show it from its
+  // first line (not the bottom of the chat), so a long answer can be read top to bottom without scrolling up.
+  useEffect(() => {
+    const box = body.current
+    if (!box) return
+    const behavior = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const el = last.current
+    if (busy || !el || msgs[msgs.length - 1]?.role !== 'bot') { box.scrollTo({ top: box.scrollHeight, behavior }); return }
+    const top = box.scrollTop + el.getBoundingClientRect().top - box.getBoundingClientRect().top - 8
+    box.scrollTo({ top: Math.max(0, top), behavior })
+  }, [msgs, busy, open])
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''), 4500); return () => clearTimeout(id) }, [toast])
 
   async function perform(actions, extra) {
@@ -98,6 +109,8 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
   }
 
   const unused = list => list.filter(s => !msgs.some(m => m.role === 'user' && m.text === s))
+  // After the first message, suggestions shrink to one row above the input, outside the conversation.
+  const followUps = [...unused(t.commands).slice(0, 2).map(s => [s, true]), ...unused(t.suggestions).slice(0, 4).map(s => [s, false])]
   return (
     <>
       {toast && !open && <div className="chat-toast" role="status">{toast}</div>}
@@ -105,10 +118,10 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
       {open && (
         <div className="chat" role="dialog" aria-label={t.title}>
           <div className="chat-head"><div><b>{t.title}</b><small><i className={`dot ${status}`} />{status === 'online' ? t.aiMode : status === 'local' ? t.localMode : t.waking}</small></div></div>
-          <div className="chat-body" aria-live="polite">
+          <div className="chat-body" aria-live="polite" ref={body}>
             <p className="hint">{t.hint}</p>
             {msgs.map((m, i) => (
-              <div key={i} className={`msg ${m.role}${m.actions ? ' did' : ''}`}>
+              <div key={i} ref={i === msgs.length - 1 ? last : null} className={`msg ${m.role}${m.actions ? ' did' : ''}`}>
                 {m.local && !m.cmd && <small className="fallback">{t.fallbackNote}</small>}
                 {m.cmd && <small className="fallback">{t.localCmd}</small>}
                 <span style={{ whiteSpace: 'pre-line' }}><Rich text={m.text} /></span>
@@ -116,12 +129,14 @@ export default function ChatWidget({ lang, t: tAll, open, setOpen }) {
                 {(() => { const n = [...new Set((m.sources || []).map(s => (s.source || '').replace(/\.md$/, '')).filter(Boolean))]; return n.length > 0 && <div className="srcs">{t.sources}: {n.map(x => <span key={x}>{x}</span>)}</div> })()}
               </div>))}
             {busy && <div className="msg bot typing">{status === 'checking' ? t.waking : t.thinking}</div>}
-            {!busy && <div className="sugg">
+            {!busy && msgs.length === 0 && <div className="sugg">
               {unused(t.commands).length > 0 && <><small>{t.commandsLabel}</small>{unused(t.commands).map(s => <button key={s} className="cmd" onClick={() => ask(s)}>{s}</button>)}</>}
               {unused(t.suggestions).length > 0 && <><small>{t.questionsLabel}</small>{unused(t.suggestions).map(s => <button key={s} onClick={() => ask(s)}>{s}</button>)}</>}
             </div>}
-            <div ref={end} />
           </div>
+          {!busy && msgs.length > 0 && followUps.length > 0 && <div className="sugg-row" aria-label={t.questionsLabel}>
+            {followUps.map(([s, cmd]) => <button key={s} title={s} className={cmd ? "cmd" : undefined} onClick={() => ask(s)}>{s}</button>)}
+          </div>}
           <form className="chat-input" onSubmit={e => { e.preventDefault(); ask() }}>
             <input aria-label={t.placeholder} value={q} onChange={e => setQ(e.target.value)} placeholder={t.placeholder} maxLength={MAX_Q} />
             <button disabled={busy}>{t.send}</button>
