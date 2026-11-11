@@ -20,10 +20,10 @@ class ChatLLM(Protocol):
 
 
 class LangChainLLM:
-    def __init__(self, base_url: str, api_key: str, model: str, timeout: float = 40.0):
+    def __init__(self, base_url: str, api_key: str, model: str, timeout: float = 40.0, max_retries: int = 1):
         from langchain_openai import ChatOpenAI
         self.chat = ChatOpenAI(base_url=base_url, api_key=api_key or "none", model=model, temperature=0.2,
-                               timeout=timeout, max_retries=1)
+                               timeout=timeout, max_retries=max_retries)
 
     def complete(self, system: str, user: str) -> str:
         return str(self.chat.invoke([SystemMessage(system), HumanMessage(user)]).content).strip()
