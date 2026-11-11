@@ -34,7 +34,7 @@ h2{font-size:1.35rem;letter-spacing:-.02em;color:var(--text);font-weight:650;mar
 .timeline .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.timeline b{font-weight:600}.timeline em{color:var(--faint);font-style:normal;font-size:.8rem;white-space:nowrap}.timeline p{margin:2px 0 0;color:var(--muted);font-size:.94rem}
 .contact{text-align:left;padding:64px 0}.contact p{color:var(--muted);margin:0}
 .project{padding:48px 0 64px;max-width:800px;margin:0 auto}.project h1{font-size:clamp(2rem,5vw,2.8rem);margin:24px 0 8px;letter-spacing:-.03em;line-height:1.1}.back{color:var(--faint);font-size:.9rem}.back:hover{color:var(--text)}
-.project h2{margin-top:48px;font-size:1.15rem}.project .grid2{gap:40px}
+.project h2{margin-top:48px;font-size:1.15rem}.project .problem{max-width:68ch;margin:0;color:var(--muted)}.project .grid2{gap:40px}
 .hero-img{border-radius:12px;border:1px solid var(--line);margin:28px 0 8px;max-height:480px;width:100%;object-fit:cover;background:#000}
 .project li{margin:6px 0;color:var(--muted)}.project ul,.project ol{padding-left:20px}
 .checks{list-style:none;padding:0!important}.checks li{padding-left:22px;position:relative}.checks li:before{content:"";position:absolute;left:2px;top:.65em;width:8px;height:8px;border-radius:2px;background:var(--brand)}
