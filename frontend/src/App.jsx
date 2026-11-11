@@ -113,7 +113,7 @@ function Home({ lang, t, cv, onAsk }) {
       <section className="hero" id="top" data-ui="section-top">
         <div className="hero-text">
           <h1>Lian Yang</h1>
-          <p className="role">{t.role} <span>· {t.roleSub}</span></p>
+          <p className="role">{t.role}<span>{t.roleSub}</span></p>
           <p className="lead">{t.hero}</p>
           <div className="cta">
             <a className="btn" href="#projects" onClick={e => goSection(e, 'projects')}>{t.ctaProjects}</a>

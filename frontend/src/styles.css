@@ -71,7 +71,7 @@ h1,h2,h3{text-wrap:balance}p,li,dd{text-wrap:pretty}
 body{transition:background-color .25s,color .25s}
 
 .icon-btn{display:inline-grid;place-items:center;width:34px;height:34px;min-height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted)!important;cursor:pointer;padding:0}.icon-btn:hover{color:var(--text)!important;border-color:var(--line-strong)}
-.role span{color:var(--faint);font-weight:450;white-space:nowrap}
+.role span{display:block;color:var(--faint);font-weight:450;font-size:.88em;margin-top:2px}
 .btn svg{flex:none}
 
 /* Drawn covers and architecture diagram (theme-aware) */
