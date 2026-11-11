@@ -115,3 +115,4 @@ body{transition:background-color .25s,color .25s}
 @media(max-width:760px){.nav nav{gap:8px}.nav .btn.small{padding:6px 10px}.gallery{grid-template-columns:1fr 1fr}.try{margin-top:-4px}}
 @media(max-width:420px){.nav nav a.icon-btn[aria-label="GitHub"]{display:none}}
 @media(prefers-reduced-motion:reduce){.ui-cursor,.ui-cursor svg{transition:none}.ui-cursor.press .ui-ripple{animation:none}}
+.sugg-row{display:flex;gap:6px;overflow-x:auto;padding:8px 10px 0;border-top:1px solid var(--line);scrollbar-width:thin;flex:none}.sugg-row button{flex:none;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;background:transparent;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:.78rem}.sugg-row button:hover{border-color:var(--line-strong)}.sugg-row button.cmd{border-style:dashed}.sugg-row+.chat-input{border-top:0}
