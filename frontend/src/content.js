@@ -1,7 +1,7 @@
 export const GITHUB = 'https://github.com/CatbearLang'
 export const EMAIL = 'Catbeardarkworld@gmail.com'
 export const LINKEDIN = 'https://www.linkedin.com/in/lianyang-dev'
-export const CV_VERSION = '2026-10-28'
+export const CV_VERSION = '2026-11-11'
 export const REPO = 'https://github.com/CatbearLang/portfolio'
 
 export const ui = {

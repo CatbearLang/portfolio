@@ -44,7 +44,7 @@ Informatics Engineering candidate (thesis stage) with 3 years of hands-on full-s
 
 ## Languages
 
-Spanish (native), English (advanced, as stated in his CV).
+Spanish (native), English (C1, as stated in his CV).
 
 ## This portfolio and its AI assistant (LangGraph project)
 
