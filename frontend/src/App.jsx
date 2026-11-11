@@ -71,7 +71,7 @@ export default function App() {
 
 function Thumb({ p, lang }) {
   const [failed, setFailed] = useState(false)
-  if (p.image && !failed) return <img src={p.image} alt={p.imageAlt?.[lang] || ''} loading="lazy" onError={() => setFailed(true)} />
+  if (p.image && !failed) return <img src={p.image} alt={p.imageAlt?.[lang] || ''} loading="lazy" style={p.imagePosition ? { objectPosition: p.imagePosition } : undefined} onError={() => setFailed(true)} />
   return <Cover kind={p.cover} title={p.name} />
 }
 

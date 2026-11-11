@@ -86,7 +86,7 @@ export const projects = [
     slug: 'elf-reader', name: 'ELF Reader', accent: '#16a34a',
     cover: 'reader', image: 'img/elf-reader/cover.webp',
     imageAlt: { en: 'ELF Reader banner with the app icon and the line Your books, narrated offline', es: 'Banner de ELF Reader con el ícono de la app y la frase Your books, narrated offline' },
-    icon: 'img/elf-reader/icon.webp',
+    icon: 'img/elf-reader/icon.webp', imagePosition: 'left center',
     video: 'img/elf-reader/demo.mp4', poster: 'img/elf-reader/demo-poster.webp', videoShape: 'phone',
     videoAlt: { en: 'Screen recording: opening a book from the library and playing a chapter aloud', es: 'Grabación de pantalla: abrir un libro desde la biblioteca y escuchar un capítulo en voz alta' },
     gallery: [
