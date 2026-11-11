@@ -71,7 +71,7 @@ h1,h2,h3{text-wrap:balance}p,li,dd{text-wrap:pretty}
 body{transition:background-color .25s,color .25s}
 
 .icon-btn{display:inline-grid;place-items:center;width:34px;height:34px;min-height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted)!important;cursor:pointer;padding:0}.icon-btn:hover{color:var(--text)!important;border-color:var(--line-strong)}
-.role span{color:var(--faint);font-weight:450}
+.role span{color:var(--faint);font-weight:450;white-space:nowrap}
 .btn svg{flex:none}
 
 /* Drawn covers and architecture diagram (theme-aware) */
@@ -131,6 +131,6 @@ body{transition:background-color .25s,color .25s}
 .cards.minor .card-body{padding:14px 16px}.cards.minor h3{font-size:1rem}.cards.minor .card p{font-size:.86rem;margin-bottom:6px}.cards.minor .tags{margin:2px 0 10px}
 @media(max-width:760px){
   .hero{grid-template-columns:1fr;gap:20px;padding:28px 0 32px}.hero h1{font-size:2.2rem}.role{font-size:1.05rem;margin-bottom:8px}.hero .lead{font-size:1rem;line-height:1.55}.hero .cta{margin:16px 0 0}.hero .cta .btn{flex:1;justify-content:center}.hero .chips{display:none}
-  .hero-ask{padding:14px}.ask-sub{display:none}.ask-prompts button:nth-child(3){display:none}
+  .hero-ask{padding:14px}.ask-sub{display:none}.ask-title{margin-bottom:10px}.ask-prompts button:nth-child(3){display:none}
   .cards.minor{grid-template-columns:1fr}.cards.minor .thumb{width:92px}
 }
