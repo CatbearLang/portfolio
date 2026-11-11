@@ -30,6 +30,8 @@ export default function App() {
   const [lang, setLang] = useState(() => (['en', 'es'].includes(localStorage.getItem('lang')) ? localStorage.getItem('lang') : 'en'))
   const [theme, setTheme] = useState(initialTheme)
   const [chatOpen, setChatOpen] = useState(false)
+  const [seed, setSeed] = useState(null)
+  const askChat = q => { setChatOpen(true); setSeed(s => ({ q, n: (s?.n || 0) + 1 })) }
   useEffect(() => { try { localStorage.setItem('lang', lang) } catch {} document.documentElement.lang = lang }, [lang])
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -60,9 +62,9 @@ export default function App() {
           <button className="lang" data-ui="lang-toggle" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} aria-label={lang === 'en' ? 'Ver en español' : 'View in English'} lang={lang === 'en' ? 'es' : 'en'}>{lang === 'en' ? 'ES' : 'EN'}</button>
         </nav>
       </header>
-      <main id="main" tabIndex={-1}>{project ? <ProjectPage p={project} lang={lang} t={t} onChat={() => setChatOpen(true)} /> : <Home lang={lang} t={t} cv={cv} onChat={() => setChatOpen(true)} />}</main>
+      <main id="main" tabIndex={-1}>{project ? <ProjectPage p={project} lang={lang} t={t} onChat={() => setChatOpen(true)} /> : <Home lang={lang} t={t} cv={cv} onAsk={askChat} />}</main>
       <footer><span>© 2026 Lian Yang</span><span>{t.footer}</span></footer>
-      <ChatWidget lang={lang} t={t} open={chatOpen} setOpen={setChatOpen} />
+      <ChatWidget lang={lang} t={t} open={chatOpen} setOpen={setChatOpen} seed={seed} />
     </>
   )
 }
@@ -73,34 +75,59 @@ function Thumb({ p, lang }) {
   return <Cover kind={p.cover} title={p.name} />
 }
 
-function Home({ lang, t, cv, onChat }) {
+function HeroAsk({ t, onAsk }) {
+  const [q, setQ] = useState('')
+  const a = t.ask
+  const send = e => { e.preventDefault(); const v = q.trim(); if (v.length < 2) return; setQ(''); onAsk(v) }
+  return (
+    <aside className="hero-ask" aria-label={a.title}>
+      <p className="ask-title"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>{a.title}</p>
+      <p className="ask-sub">{a.sub}</p>
+      <div className="ask-prompts">{a.prompts.map(([s, cmd]) => <button key={s} type="button" className={cmd ? 'cmd' : undefined} onClick={() => onAsk(s)}>{s}</button>)}</div>
+      <form className="ask-form" onSubmit={send}>
+        <input aria-label={a.placeholder} value={q} onChange={e => setQ(e.target.value)} placeholder={a.placeholder} maxLength={300} />
+        <button className="btn small">{a.send}</button>
+      </form>
+    </aside>
+  )
+}
+
+function ProjectCard({ p, lang, t, minor }) {
+  return (
+    <a className={minor ? 'card minor' : 'card'} href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }} data-ui={`project-${p.slug}`}>
+      <div className="thumb"><Thumb p={p} lang={lang} /></div>
+      <div className="card-body">
+        <h3>{p.name}</h3><p>{p[lang].tagline}</p>{!minor && <p className="metric">{p[lang].metric}</p>}
+        <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
+        <span className="more">{t.readMore}</span>
+      </div>
+    </a>
+  )
+}
+
+function Home({ lang, t, cv, onAsk }) {
+  const main = projects.filter(p => !p.minor)
+  const other = projects.filter(p => p.minor)
   return (
     <>
       <section className="hero" id="top" data-ui="section-top">
-        <h1>Lian Yang</h1>
-        <p className="role">{t.role} <span>· {t.roleSub}</span></p>
-        <p className="lead">{t.hero}</p>
-        <div className="cta">
-          <a className="btn" href="#projects" onClick={e => goSection(e, 'projects')}>{t.ctaProjects}</a>
-          <button className="btn ghost" onClick={onChat}>{t.ctaChat}</button>
-          <a className="btn ghost" href={LINKEDIN} target="_blank" rel="noreferrer">{Icon.linkedin} LinkedIn</a>
-          <a className="btn ghost" href={cv} download>{t.nav.cv} (PDF)</a>
+        <div className="hero-text">
+          <h1>Lian Yang</h1>
+          <p className="role">{t.role}<span>{t.roleSub}</span></p>
+          <p className="lead">{t.hero}</p>
+          <div className="cta">
+            <a className="btn" href="#projects" onClick={e => goSection(e, 'projects')}>{t.ctaProjects}</a>
+            <a className="btn ghost" href="#contact" onClick={e => goSection(e, 'contact')}>{t.ctaContact}</a>
+          </div>
+          <div className="chips">{['Python', 'FastAPI', 'LangGraph', 'RAG', 'React', 'PostgreSQL', 'Docker', 'Kotlin'].map(s => <span key={s}>{s}</span>)}</div>
         </div>
-        <p className="try">{t.tryLine}</p>
-        <div className="chips">{['Python', 'FastAPI', 'LangGraph', 'RAG', 'React', 'PostgreSQL', 'Docker', 'Kotlin'].map(s => <span key={s}>{s}</span>)}</div>
+        <HeroAsk t={t} onAsk={onAsk} />
       </section>
 
       <section id="projects"><h2>{t.projectsTitle}</h2>
-        <div className="cards">{projects.map(p => (
-          <a key={p.slug} className="card" href={`#/projects/${p.slug}`} style={{ '--accent': p.accent }} data-ui={`project-${p.slug}`}>
-            <div className="thumb"><Thumb p={p} lang={lang} /></div>
-            <div className="card-body">
-              <h3>{p.name}</h3><p>{p[lang].tagline}</p><p className="metric">{p[lang].metric}</p>
-              <div className="tags">{p.tags.map(x => <span key={x}>{x}</span>)}</div>
-              <span className="more">{t.readMore}</span>
-            </div>
-          </a>))}
-        </div>
+        <div className="cards">{main.map(p => <ProjectCard key={p.slug} p={p} lang={lang} t={t} />)}</div>
+        {other.length > 0 && <><h3 className="other-title">{t.otherProjects}</h3>
+          <div className="cards minor">{other.map(p => <ProjectCard key={p.slug} p={p} lang={lang} t={t} minor />)}</div></>}
       </section>
 
       <section className="grid2">
