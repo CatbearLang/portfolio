@@ -67,7 +67,7 @@ When the free backend is asleep, still waking up or out of quota, `frontend/src/
 - Prompt-injection hardening (not a guarantee): regex prefilter; visitor text, history and documents wrapped in tags the prompts treat as data; the model never sees secrets; read-only search and whitelisted page tools; grounding check.
 - Suggested questions are precomputed once with the real graph (`python -m scripts.build_suggested`) and repeated questions hit an LRU cache: 0 API calls.
 - Provider errors become a generic 502; keys never reach the browser or logs.
-- The page pings `/api/health` on load, so the free server starts waking up while the visitor reads.
+- The page pings `/api/health` on load, so the free server starts waking up while the visitor reads, and a scheduled workflow ([keep-awake](.github/workflows/keep-awake.yml)) pings it every 10 minutes so it rarely sleeps. The health endpoint never calls the model.
 
 ## Evaluation
 
@@ -124,7 +124,7 @@ To update what the assistant knows, edit `backend/data/knowledge/*.md` and resta
 ## Deployment
 
 - **Frontend:** GitHub Pages (`gh-pages` branch), built with `VITE_API_URL=<backend URL>`. `base: './'` + hash routing, so no server rewrites are needed.
-- **Backend:** Render web service, root `backend`, build `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Environment: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `CORS_ORIGINS`, and optionally the variables in `backend/.env.example`. Free instances sleep after 15 minutes idle and take about a minute to wake up; the widget's in-browser fallback covers that.
+- **Backend:** Render web service, root `backend`, build `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Environment: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `CORS_ORIGINS`, and optionally the variables in `backend/.env.example`. Free instances sleep after 15 minutes idle and take about a minute to wake up; the keep-awake workflow prevents most of that, and the widget's in-browser fallback covers the rest.
 
 ## Author
 

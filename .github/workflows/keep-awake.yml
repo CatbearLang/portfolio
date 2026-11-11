@@ -1,0 +1,31 @@
+# Keeps the free Render backend awake so visitors don't wait for a cold start.
+# Render's free instances sleep after 15 minutes without traffic; this pings the health
+# endpoint every 10 minutes. /api/health doesn't call the model, so it spends no LLM quota.
+# One always-on free service fits Render's monthly free instance hours.
+name: Keep backend awake
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keep-awake
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      HEALTH_URL: https://lian-portfolio-api.onrender.com/api/health
+    steps:
+      - name: Ping health endpoint
+        run: |
+          # A sleeping instance takes about a minute to wake up, hence the long timeout.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 80 --retry 1 --retry-delay 10 "$HEALTH_URL" || true)
+          echo "health: HTTP ${code:-none}"
+          # Never fail the run: a missed ping only means the next visitor waits once.
+          if [ "$code" != "200" ]; then echo "::warning::Backend health returned ${code:-no response}"; fi
