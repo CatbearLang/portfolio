@@ -202,17 +202,18 @@ function ProjectPage({ p, lang, t, onChat }) {
       <a href="#/" className="back">{t.back}</a>
       <h1>{p.name}</h1><p className="lead">{c.tagline}</p>
       <dl className="facts"><div><dt>{t.context}</dt><dd>{c.context}</dd></div><div><dt>{t.stackL}</dt><dd>{p.tags.join(' · ')}</dd></div></dl>
-      {p.chatCta && <div className="cta"><button className="btn" onClick={onChat}>{t.tryIt}</button>{p.links.map(([n, u]) => <a key={u} className="btn ghost" href={u} target="_blank" rel="noreferrer">{linkName(n, lang)}</a>)}</div>}
+      {(p.chatCta || p.links.length > 0) && <div className="cta">{p.chatCta && <button className="btn" onClick={onChat}>{t.tryIt}</button>}{p.links.map(([n, u], i) => <a key={u} className={`btn${p.chatCta || i ? ' ghost' : ''}`} href={u} target="_blank" rel="noreferrer">{linkName(n, lang)}</a>)}</div>}
       <HeroMedia key={p.slug} p={p} lang={lang} />
-      {p.diagram && <><h2>{t.architecture}</h2><Diagram lang={lang} /></>}
       {p.audio && <AudioList key={`a-${p.slug}`} items={p.audio} lang={lang} title={t.listen} />}
-      <div className="grid2">
-        <div><h2>{t.highlights}</h2><ul className="checks">{c.highlights.map(h => <li key={h}>{h}</li>)}</ul></div>
-        <div><h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol></div>
-      </div>
-      {c.built && <><h2>{t.built}</h2><ul>{c.built.map(h => <li key={h}>{h}</li>)}</ul></>}
+      <h2>{t.problem}</h2><p className="problem">{c.problem}</p>
+      <h2>{t.how}</h2><ol>{c.how.map(h => <li key={h}>{h}</li>)}</ol>
+      {p.diagram && <><h2>{t.architecture}</h2><Diagram lang={lang} /></>}
       {p.gallery && <Gallery key={`g-${p.slug}`} items={p.gallery} lang={lang} title={t.screenshots} />}
-      {!p.chatCta && p.links.length > 0 && <><h2>{t.links}</h2><div className="cta">{p.links.map(([n, u]) => <a key={u} className="btn" href={u} target="_blank" rel="noreferrer">{linkName(n, lang)}</a>)}</div></>}
+      <h2>{t.decisions}</h2><ul>{c.decisions.map(h => <li key={h}>{h}</li>)}</ul>
+      <div className="grid2">
+        <div><h2>{t.results}</h2><ul className="checks">{c.results.map(h => <li key={h}>{h}</li>)}</ul></div>
+        {c.limits && <div><h2>{t.limits}</h2><ul>{c.limits.map(h => <li key={h}>{h}</li>)}</ul></div>}
+      </div>
     </article>
   )
 }
