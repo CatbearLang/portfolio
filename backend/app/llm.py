@@ -80,5 +80,76 @@ class FakeLLM:
         return RunnableLambda(run)
 
 
-def make_llm(provider: str, base_url: str, api_key: str, model: str) -> ChatLLM:
-    return FakeLLM() if provider == "fake" else LangChainLLM(base_url, api_key, model)
+def is_provider_error(e: Exception) -> bool:
+    """Errors that say "this model can't answer right now" (rate limit, timeout, connection, 4xx/5xx from the
+    provider), as opposed to bugs in our code, which must not be hidden by trying another model."""
+    try:
+        import openai
+    except ImportError:  # pragma: no cover
+        return False
+    return isinstance(e, openai.APIError)
+
+
+class FallbackLLM:
+    """Tries models in order. When one fails with a provider error, the same call goes to the next one.
+    A model that hit a rate limit is skipped for `cooldown` seconds, so the rest of the question (and the next
+    visitors) don't spend a request and a timeout on it first. Logs which model answered, never keys or prompts."""
+
+    def __init__(self, models: list[tuple[str, ChatLLM]], cooldown: float = 60.0, clock=None):
+        import time
+        assert models, "at least one model"
+        self.models, self.cooldown, self.clock = models, cooldown, clock or time.monotonic
+        self.until: dict[str, float] = {}
+        self.last_model: str | None = None
+
+    def _order(self) -> list[tuple[str, ChatLLM]]:
+        now = self.clock()
+        ready = [m for m in self.models if self.until.get(m[0], 0) <= now]
+        return ready or self.models  # everything cooling down: try them all anyway
+
+    def _run(self, call):
+        import logging
+        log = logging.getLogger("portfolio")
+        failed: list[str] = []
+        last: Exception | None = None
+        for name, llm in self._order():
+            try:
+                out = call(name, llm)
+            except Exception as e:
+                if not is_provider_error(e):
+                    raise
+                last = e
+                failed.append(f"{name} ({type(e).__name__})")
+                if getattr(e, "status_code", None) == 429 or type(e).__name__ == "RateLimitError":
+                    self.until[name] = self.clock() + self.cooldown
+                continue
+            self.last_model = name
+            if failed:
+                log.info("llm fallback: answered by %s after %s", name, ", ".join(failed))
+            return out
+        log.warning("llm fallback: every model failed: %s", ", ".join(failed))
+        raise last  # type: ignore[misc]
+
+    def complete(self, system: str, user: str) -> str:
+        return self._run(lambda name, llm: llm.complete(system, user))
+
+    def with_tools(self, tools: list):
+        bound: dict[str, object] = {}
+
+        def invoke(messages):
+            def call(name, llm):
+                if name not in bound:
+                    bound[name] = llm.with_tools(tools)
+                return bound[name].invoke(messages)
+            return self._run(call)
+        return RunnableLambda(invoke)
+
+
+def make_llm(provider: str, base_url: str, api_key: str, model: str, fallbacks: list[str] | None = None) -> ChatLLM:
+    if provider == "fake":
+        return FakeLLM()
+    names = [model, *[m for m in (fallbacks or []) if m and m != model]]
+    if len(names) == 1:
+        return LangChainLLM(base_url, api_key, model)
+    # With fallbacks, no retry on the same model: the next model is a faster way out of a rate limit.
+    return FallbackLLM([(m, LangChainLLM(base_url, api_key, m, max_retries=0)) for m in names])
