@@ -91,7 +91,9 @@ def get_graph():
     STATE["embedder"] = f"{type(emb).__name__}" + (f" ({settings.embed_model})" if type(emb).__name__ == "Model2VecEmbedder" else "")
     log.info("embedder ready: %s", STATE["embedder"])
     kb = KnowledgeBase.from_dir(settings.knowledge_dir, emb)
-    llm = make_llm(settings.llm_provider, settings.llm_base_url, settings.llm_api_key, settings.llm_model)
+    llm = make_llm(settings.llm_provider, settings.llm_base_url, settings.llm_api_key, settings.llm_model,
+                   settings.llm_fallback_models)
+    log.info("llm models: %s", ", ".join([settings.llm_model, *settings.llm_fallback_models]))
     return build_graph(kb, llm, settings.top_k, settings.min_score, settings.skip_grade_score)
 
 

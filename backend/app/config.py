@@ -19,6 +19,9 @@ class Settings:
     llm_base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1"))
     llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
     llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL", "llama-3.1-8b-instant"))
+    # Ordered fallbacks, tried when the main model hits a rate limit, times out or returns a provider error.
+    llm_fallback_models: list[str] = field(default_factory=lambda: [m.strip() for m in os.getenv(
+        "LLM_FALLBACK_MODELS", "").split(",") if m.strip()])
     llm_provider: str = field(default_factory=lambda: os.getenv("LLM_PROVIDER", "openai"))  # openai | fake
     embedder: str = field(default_factory=lambda: os.getenv("EMBED_BACKEND", "model2vec"))  # model2vec | hash (tests) | fastembed (local only; legacy EMBEDDER var is ignored)
     # Only model2vec static models are valid here. A leftover EMBED_MODEL from the old fastembed setup

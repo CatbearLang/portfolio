@@ -6,7 +6,7 @@ Bilingual (EN/ES) portfolio with a **LangGraph** assistant that answers recruite
 
 - Frontend: React + Vite, static on GitHub Pages (`frontend/`)
 - Backend: FastAPI + LangGraph + LangChain, free Render instance, free LLM through OpenRouter (`backend/`)
-- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 52 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
+- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 63 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
 - Evaluation: `backend/eval/questions.jsonl` (39 labeled questions) and `python -m scripts.eval`
 
 ## Architecture
@@ -56,6 +56,7 @@ When the free backend is asleep, still waking up or out of quota, `frontend/src/
 - **Hybrid search:** BM25 (60%) + semantic embeddings (40%) from [model2vec](https://github.com/MinishLab/model2vec) `minishlab/potion-base-8M` (static, ~30 MB, no torch) in a FAISS flat index. Peak RSS about 195 MB measured locally, so it fits Render's 512 MB free instance.
 - **Fixed score scale:** BM25 is squashed with `bm25 / (bm25 + 4)` instead of being divided by the best hit of each query. Before, every query's top hit looked perfect, so the minimum score filtered nothing; now `RETRIEVAL_MIN_SCORE` (0.25) drops weak matches, and a top hit at or above `SKIP_GRADE_SCORE` (0.6) skips the LLM grading call.
 - **Grounded answers:** the answer prompt allows only the numbered sources; a second LLM call checks the answer, retries once with stricter instructions, then says "I don't have that information".
+- **Fallback models:** `LLM_FALLBACK_MODELS` (comma-separated) lists models to try in order when the main one hits a rate limit, times out or returns a provider error. A rate-limited model is skipped for 60 seconds; other errors (bugs) are not retried on another model. The log says which model answered. Page actions from any model still go through the same whitelist.
 - **LLM calls per question:** 1 for page commands and off-topic messages; typically 3 to 4 for questions (agent, grade unless skipped, answer, check); max 8; 0 for regex-declined, precomputed or cached questions.
 - **Agent trace:** every response includes `trace` (nodes, retrieved chunks with scores, grounding verdict) and the cited snippets; the widget shows them.
 
@@ -128,7 +129,7 @@ To update what the assistant knows, edit `backend/data/knowledge/*.md` and resta
 ## Deployment
 
 - **Frontend:** GitHub Pages (`gh-pages` branch), built with `VITE_API_URL=<backend URL>`. `base: './'` + hash routing, so no server rewrites are needed.
-- **Backend:** Render web service, root `backend`, build `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Environment: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `CORS_ORIGINS`, and optionally the variables in `backend/.env.example`. Free instances sleep after 15 minutes idle and take about a minute to wake up; the keep-awake workflow prevents most of that, and the widget's in-browser fallback covers the rest.
+- **Backend:** Render web service, root `backend`, build `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Environment: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_FALLBACK_MODELS` (optional), `CORS_ORIGINS`, and optionally the variables in `backend/.env.example`. Free instances sleep after 15 minutes idle and take about a minute to wake up; the keep-awake workflow prevents most of that, and the widget's in-browser fallback covers the rest.
 
 ## Author
 
