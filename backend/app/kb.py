@@ -137,23 +137,28 @@ class KnowledgeBase:
                     out[i] += self._idf[w] * f * 2.2 / (f + 1.2 * (0.25 + 0.75 * self._len[i] / self._avg))
         return out
 
-    def search(self, query: str, k: int = 4) -> list[tuple[Chunk, float]]:
+    def scores(self, query: str) -> tuple[np.ndarray, np.ndarray]:
+        """Per-chunk (cosine similarity, BM25 squashed to 0..1 on a fixed scale). Exposed for the evaluation script."""
+        q = self.embedder.embed([query])
+        faiss.normalize_L2(q)
+        sims, idx = self.index.search(q, len(self.chunks))
+        vec = np.zeros(len(self.chunks), dtype="float32")
+        for s_, i in zip(sims[0], idx[0]):
+            if i >= 0:
+                vec[i] = s_
+        bm = self._bm25(query)
+        return vec, bm / (bm + BM25_K)
+
+    def search(self, query: str, k: int = 4, mode: str = "hybrid") -> list[tuple[Chunk, float]]:
         """Hybrid: 0.4 * cosine (vector) + 0.6 * BM25 squashed to 0..1 with a fixed scale (bm / (bm + BM25_K)).
+        mode="bm25" or "vector" ranks by one signal only (used by the evaluation to compare them).
 
         A fixed scale keeps scores comparable across queries, so a minimum score can actually filter: a query that
         shares one incidental word with a document gets a low score instead of being stretched to 1 (the old
         "divide by the best match" normalization made every query's top hit look perfect)."""
-        q = self.embedder.embed([query])
-        faiss.normalize_L2(q)
-        scores, idx = self.index.search(q, len(self.chunks))
-        vec = np.zeros(len(self.chunks), dtype="float32")
-        for s_, i in zip(scores[0], idx[0]):
-            if i >= 0:
-                vec[i] = s_
-        bm = self._bm25(query)
-        bm = bm / (bm + BM25_K)
-        total = 0.4 * vec + 0.6 * bm
-        order = np.argsort(-total)[:k]
+        vec, bm = self.scores(query)
+        total = bm if mode == "bm25" else vec if mode == "vector" else 0.4 * vec + 0.6 * bm
+        order = np.argsort(-total, kind="stable")[:k]
         return [(self.chunks[i], float(total[i])) for i in order]
 
 

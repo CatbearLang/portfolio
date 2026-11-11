@@ -6,8 +6,8 @@ Bilingual (EN/ES) portfolio with a **LangGraph** assistant that answers recruite
 
 - Frontend: React + Vite, static on GitHub Pages (`frontend/`)
 - Backend: FastAPI + LangGraph + LangChain, free Render instance, free LLM through OpenRouter (`backend/`)
-- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 47 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
-- Evaluation: `backend/eval/questions.jsonl` (32 labeled questions) and `python -m scripts.eval`
+- Tests ([CI](https://github.com/CatbearLang/portfolio/actions/workflows/ci.yml)): 52 backend tests (fake LLM, no network) + 24 frontend tests for the in-browser command matcher
+- Evaluation: `backend/eval/questions.jsonl` (39 labeled questions) and `python -m scripts.eval`
 
 ## Architecture
 
@@ -71,13 +71,17 @@ When the free backend is asleep, still waking up or out of quota, `frontend/src/
 
 ## Evaluation
 
+`backend/eval/questions.jsonl` holds 39 labeled questions: 20 with the documents that answer them and the key facts the answer must contain, 3 the docs can't answer, 9 the assistant must decline (off-topic, prompt injection, secrets, personal data) with strings that must never appear, and 7 page commands. Grading is deterministic (regexes, citation check, graph output), with no LLM judge.
+
 ```bash
 cd backend
-python -m scripts.eval                   # retrieval only, offline: hit@1, hit@3, MRR, min-score separation
-python -m scripts.eval --e2e --limit 10  # full graph with the configured LLM: outcome, grounding, latency, LLM calls
+python -m scripts.eval retrieval   # offline, no LLM: BM25 vs embeddings vs hybrid (hit@1, hit@3, MRR, AUC)
+python -m scripts.eval models      # 16 questions through the real graph per model; spends free quota (capped)
 ```
 
-Results are written to `backend/eval/results.md`. The end-to-end mode spends real quota (about 1 to 4 calls per question).
+Results go to `backend/eval/results/`. The retrieval run also happens on every backend pull request ([eval workflow](.github/workflows/eval.yml)). The model run is manual (Actions > Assistant evaluation > Run workflow) and needs the `OPENROUTER_API_KEY` repository secret; it uses at most 225 requests, one every 3.5 seconds, with retries off.
+
+First model run (November 11, 2026, [results](backend/eval/results/models.md)), 16 questions per model on free tiers, so differences of one or two are not significant. Correct out of the questions each model answered: nvidia/nemotron-3.5-super-vl 14/15, dots-3-note-preview 13/13, lfm-3-1.7b 13/14, flint-v1.0 8/10. The rest never got an answer (request budget, rate limits, rejected requests). inkling-2-small couldn't be evaluated: OpenRouter rejected every request to it from this account. Nemotron stays as the main model, with dots-3-note-preview and lfm-3-1.7b as fallbacks.
 
 ## Layout
 

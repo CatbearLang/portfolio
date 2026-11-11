@@ -214,6 +214,15 @@ function ProjectPage({ p, lang, t, onChat }) {
         <div><h2>{t.results}</h2><ul className="checks">{c.results.map(h => <li key={h}>{h}</li>)}</ul></div>
         {c.limits && <div><h2>{t.limits}</h2><ul>{c.limits.map(h => <li key={h}>{h}</li>)}</ul></div>}
       </div>
+      {c.evaluation && <section className="evaluation">
+        <h2>{c.evaluation.title}</h2><p className="eval-meta">{c.evaluation.meta}</p>
+        {c.evaluation.tables.map(tb => <div className="table-wrap" key={tb.caption}><table className="eval-table">
+          <caption>{tb.caption}</caption>
+          <thead><tr>{tb.head.map(h => <th key={h} scope="col">{h}</th>)}</tr></thead>
+          <tbody>{tb.rows.map(r => <tr key={r[0]}>{r.map((v, i) => i ? <td key={i}>{v}</td> : <th key={i} scope="row">{v}</th>)}</tr>)}</tbody>
+        </table></div>)}
+        <ul>{c.evaluation.notes.map(n => <li key={n}>{n}</li>)}</ul>
+      </section>}
     </article>
   )
 }

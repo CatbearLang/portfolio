@@ -134,3 +134,4 @@ body{transition:background-color .25s,color .25s}
   .hero-ask{padding:14px}.ask-sub{display:none}.ask-title{margin-bottom:10px}.ask-prompts button:nth-child(3){display:none}
   .cards.minor{grid-template-columns:1fr}.cards.minor .thumb{width:92px}
 }
+.evaluation .eval-meta{color:var(--muted);max-width:68ch;margin:0 0 16px}.table-wrap{overflow-x:auto;margin:0 0 16px}.eval-table{border-collapse:collapse;width:100%;font-size:.92rem}.eval-table caption{text-align:left;color:var(--faint);font-size:.85rem;padding-bottom:8px}.eval-table th,.eval-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}.eval-table thead th{color:var(--muted);font-weight:500}.eval-table tbody th{font-weight:500}.evaluation ul{max-width:68ch}
