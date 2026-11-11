@@ -56,7 +56,7 @@ def test_grade_declines_and_actions():
     assert grade(item("action-dark-es"), {"error": "RateLimitError"})[0] is False
 
 
-def test_summary_counts_unrun_questions_as_wrong():
+def test_summary_separates_unanswered_from_wrong():
     qs = [{"id": "a", "expect": "fact"}, {"id": "b", "expect": "refuse"}, {"id": "c", "expect": "action:set_theme=dark"}]
     run = {"model": "m", "calls": 5, "rows": [
         {"id": "a", "ok": True, "reason": "ok", "latency": 2.0, "errors": [], "tool_call_failed": False, "path": []},
@@ -65,6 +65,6 @@ def test_summary_counts_unrun_questions_as_wrong():
         {"id": "c", "ok": False, "reason": "not run (call budget reached)", "calls": 0, "latency": None},
     ]}
     s = summarize(run, qs)
-    assert s["overall"] == (1, 3) and s["actions"] == (0, 1) and s["ran"] == 2
+    assert s["answered"] == 2 and s["not_run"] == 1 and s["correct"] == (1, 2) and s["actions"] == (0, 0)
     md = models_md([run], qs)
-    assert "| m | 1/3 |" in md and "nan" not in md and "m: b: answer: x" in md
+    assert "| m | 2/3 | 1/2 | 1 |" in md and "nan" not in md and "m: b: answer: x" in md

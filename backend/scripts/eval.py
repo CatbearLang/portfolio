@@ -241,37 +241,44 @@ def run_model(model: str, kb, settings: Settings, qs: list[dict], cap: int, gap:
     return {"model": model, "calls": llm.calls, "rows": rows}
 
 
+def not_run(r: dict) -> bool:
+    """The model never produced an answer: call budget reached, or the provider failed the request
+    (rate limit, rejected request, server error). These are availability problems, not wrong answers."""
+    return r["reason"].startswith(("not run", "provider error"))
+
+
 def summarize(run: dict, qs: list[dict]) -> dict:
-    """Scores count every question in the subset: a question that was not run (call budget reached) counts as wrong,
-    so a model that burns its budget early can't look better by answering fewer questions."""
+    """Wrong answers and requests that never got an answer are counted apart."""
     by = {q["id"]: q for q in qs}
     kind = lambda r: "action" if by[r["id"]]["expect"].startswith("action") else by[r["id"]]["expect"]
-    ran = [r for r in run["rows"] if r["latency"] is not None]
+    answered = [r for r in run["rows"] if not not_run(r)]
     count = lambda rs: (sum(r["ok"] for r in rs), len(rs))
-    lat = sorted(r["latency"] for r in ran) or [float("nan")]
+    lat = sorted(r["latency"] for r in answered if r["latency"] is not None) or [float("nan")]
     return {
-        "model": run["model"], "ran": len(ran), "of": len(run["rows"]), "requests": run["calls"],
-        "overall": count(run["rows"]),
-        "facts": count([r for r in run["rows"] if kind(r) == "fact"]),
-        "declines": count([r for r in run["rows"] if kind(r) in ("refuse", "unsupported")]),
-        "actions": count([r for r in run["rows"] if kind(r) == "action"]),
+        "model": run["model"], "questions": len(run["rows"]), "answered": len(answered),
+        "not_run": len(run["rows"]) - len(answered), "requests": run["calls"],
+        "correct": count(answered),
+        "facts": count([r for r in answered if kind(r) == "fact"]),
+        "declines": count([r for r in answered if kind(r) in ("refuse", "unsupported")]),
+        "actions": count([r for r in answered if kind(r) == "action"]),
         "p50": statistics.median(lat), "p95": lat[min(len(lat) - 1, round(0.95 * (len(lat) - 1)))],
-        "with_errors": (sum(1 for r in ran if r["errors"] or r["tool_call_failed"]), len(ran)),
+        "tool_call_fallbacks": sum(1 for r in answered if r["tool_call_failed"]),
     }
 
 
 def models_md(runs: list[dict], qs: list[dict]) -> str:
-    frac = lambda c: f"{c[0]}/{c[1]}"
+    frac = lambda c: f"{c[0]}/{c[1]}" if c[1] else "-"
     lines = [f"# Model evaluation ({date.today().isoformat()})", "",
-             f"{len(qs)} questions per model through the live graph (same retrieval, prompts and limits as the site). "
-             "Deterministic grading: key facts and citations by regex, declines and page actions from the graph output. "
-             "Questions not run because the call budget ran out count as wrong.", "",
-             "| model | correct | facts | declines | page actions | p50 / p95 latency | requests | ran | runs with errors |",
+             f"{len(qs)} questions per model through the live graph (same retrieval, prompts and limits as the site), "
+             "free tiers, one run: a difference of one or two questions is not significant. Deterministic grading: key facts "
+             "and citations by regex, declines and page actions from the graph output. \"Not run\" means the request never "
+             "got an answer (call budget reached, rate limit or provider error) and is not counted as wrong.", "",
+             "| model | answered | correct of answered | not run | facts | declines | page actions | p50 / p95 latency | requests |",
              "|---|---|---|---|---|---|---|---|---|"]
     for run in runs:
         s = summarize(run, qs)
-        lines.append(f"| {s['model']} | {frac(s['overall'])} | {frac(s['facts'])} | {frac(s['declines'])} | {frac(s['actions'])} | "
-                     f"{s['p50']:.1f}s / {s['p95']:.1f}s | {s['requests']} | {s['ran']}/{s['of']} | {frac(s['with_errors'])} |")
+        lines.append(f"| {s['model']} | {s['answered']}/{s['questions']} | {frac(s['correct'])} | {s['not_run']} | {frac(s['facts'])} | "
+                     f"{frac(s['declines'])} | {frac(s['actions'])} | {s['p50']:.1f}s / {s['p95']:.1f}s | {s['requests']} |")
     lines += ["", "## Failures by cause", ""]
     causes: dict[str, list[str]] = {}
     for run in runs:

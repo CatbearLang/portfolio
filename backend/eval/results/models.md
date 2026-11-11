@@ -26,7 +26,7 @@ The table above is the run's own output, copied from the job log of GitHub Actio
 
 Notes added after the run:
 
-- The percentages above only count questions that ran. Counting all 16 (a question not run is wrong), the correct totals are: Nemotron 14/16, inkling 1/16, LFM 13/16, Flint 8/16, dots 13/16. The script now reports it that way.
+- Read this way (wrong answers apart from requests that never got an answer: budget reached, rate limit or provider error), correct out of answered is: Nemotron 14/15 (1 not run), dots 13/13 (3 not run), LFM 13/14 (2 not run), Flint 8/10 (6 not run). inkling is not evaluable: every model call was rejected. The script now reports it this way. With 16 questions on free tiers, a difference of one or two is not significant. The latencies above are over questions that ran, including the failed requests.
 - inkling's one pass is `adv-dev-mode`, which the regex prefilter declines without calling the model; every model call to it was refused (HTTP 403).
 - Three questions used "he/his" for Lian at the time of this run; they now say "Lian" (same meaning, no other change).
 - The run did not log why two models gave no answer on `stickman-cost`; the script now records the last graph steps of each failed question.

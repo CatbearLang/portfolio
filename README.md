@@ -81,7 +81,7 @@ python -m scripts.eval models      # 16 questions through the real graph per mod
 
 Results go to `backend/eval/results/`. The retrieval run also happens on every backend pull request ([eval workflow](.github/workflows/eval.yml)). The model run is manual (Actions > Assistant evaluation > Run workflow) and needs the `OPENROUTER_API_KEY` repository secret; it uses at most 225 requests, one every 3.5 seconds, with retries off.
 
-First model run (November 11, 2026, [results](backend/eval/results/models.md)): out of 16 questions, nvidia/nemotron-3.5-super-vl got 14, dots-3-note-preview and lfm-3-1.7b 13, flint-v1.0 8 (it ran out of requests after 10) and inkling-2-small 1 (the provider refused every call from this account). Nemotron stays as the main model, with dots-3-note-preview and lfm-3-1.7b as fallbacks.
+First model run (November 11, 2026, [results](backend/eval/results/models.md)), 16 questions per model on free tiers, so differences of one or two are not significant. Correct out of the questions each model answered: nvidia/nemotron-3.5-super-vl 14/15, dots-3-note-preview 13/13, lfm-3-1.7b 13/14, flint-v1.0 8/10. The rest never got an answer (request budget, rate limits, rejected requests). inkling-2-small couldn't be evaluated: OpenRouter rejected every request to it from this account. Nemotron stays as the main model, with dots-3-note-preview and lfm-3-1.7b as fallbacks.
 
 ## Layout
 
