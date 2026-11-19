@@ -187,7 +187,7 @@ export const projects = [
     image: 'img/arcane-knockout-unity-poster.jpg',
     video: 'img/arcane-knockout-unity.mp4',
     tags: ['Unity 6', 'C#', 'Unity Netcode', 'Multiplayer'],
-    links: [],
+    links: [[{ en: 'Play on itch.io', es: 'Jugar en itch.io' }, 'https://catbeardark.itch.io/arcane-knockout']],
     en: {
       tagline: "An online multiplayer wizard-duel game in Unity 6, with the game logic, bots and networking written in C#.",
       metric: "Windows build 0.0.9 · online and LAN play · bots with personalities",

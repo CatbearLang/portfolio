@@ -2,6 +2,10 @@
 
 > 3D wizard-duel arena game built with **Unity 6 (C#)**, inspired by the *Warlock* custom map from Warcraft III. Online multiplayer, Windows build 0.0.9 (Oct 20, 2026). It was migrated to Unity 6 from an earlier prototype.
 
+## Where to play it
+
+The game is public on itch.io: https://catbeardark.itch.io/arcane-knockout
+
 ## What it is
 
 There is no health bar. Every hit raises your **Instability**, so the next push throws you farther. The last wizard standing wins while the platform crumbles into the lava. Between rounds players spend gold in a shop. Arenas include a grassy island and a volcanic lava arena that collapses during the match.
